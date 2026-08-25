@@ -1,0 +1,12 @@
+runs/
+weights-vault/
+*.pt
+data/datasets/
+data/raw/
+data/frames/
+data/labels/
+mlflow/
+.trash/
+backups/
+__pycache__/
+*.log
