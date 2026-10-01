@@ -28,7 +28,7 @@
 \maketitle
 
 \begin{abstract}
-The dominant evaluation protocol for 2D human pose estimation---mean average precision based on Object Keypoint Similarity (OKS-mAP)---is insensitive to three properties that matter for downstream applications: it does not distinguish visible, occluded, and missing keypoints; it does not measure joint-angle error; and it is silent on the temporal stability of outputs produced by tracking-free, frame-by-frame inference. We propose a unified supplementary evaluation protocol with three modules: (M1) OKS-mAP stratified by ground-truth visibility labels ($v$), together with $\Delta_{\mathrm{occ}}=\mathrm{mAP}(v{=}1)-\mathrm{mAP}(\mathrm{full})$, which quantifies how much the aggregate metric masks occlusion-specific differences; (M2) joint-angle error (RMSE/MAE/P95) against angles derived from ground-truth keypoints, plus knee-valgus detection consistency (Cohen's $\kappa$); and (M3) frame-to-frame displacement, median-filter residual jitter, and jump rate under tracking-free per-frame inference, before and after OneEuro smoothing. We executed the protocol on four public datasets (COCO val2017, CrowdPose, OCHuman, PoseTrack18) for two representative models (the official YOLO11s-pose and a model fine-tuned with occlusion-domain data), with all metrics produced by an open-source harness in a single inference pass. $\Delta_{\mathrm{occ}}$ is negative for every model--dataset combination ($-0.24$ to $-0.41$): the aggregate mAP systematically overestimates occluded-scene performance. Joint-angle error is systematically amplified in occluded layers, and on the occlusion-domain datasets the angle metrics reveal significant differences between the two models that the aggregate mAP cannot localize. The two models show no significant difference in raw temporal jitter, while pixel-domain OneEuro smoothing reduces the jump rate by 9--10\% at zero accuracy cost ($|\Delta\mathrm{AP}|\le 0.0002$). Correlation analysis shows that stratified mAP is highly consistent with full mAP (Kendall $\tau=1.0$)---its value lies in magnitude diagnosis rather than re-ranking---while the angle metrics, particularly knee angle, carry partially independent information ($\rho=0.72$, $n=6$, exploratory). The protocol and harness are open-sourced and positioned as a complement to, not a replacement for, OKS-mAP.
+The dominant evaluation protocol for 2D human pose estimation---mean average precision based on Object Keypoint Similarity (OKS-mAP)---is insensitive to three properties that matter for downstream applications: it does not distinguish visible from occluded keypoints in the aggregate score; it does not measure joint-angle error; and it is silent on the temporal stability of outputs produced by tracking-free, frame-by-frame inference. We propose a unified supplementary evaluation protocol with three modules: (M1) OKS-mAP stratified by ground-truth visibility labels ($v$), together with $\Delta_{\mathrm{occ}}=\mathrm{mAP}(v{=}1)-\mathrm{mAP}(\mathrm{full})$, which quantifies how much the aggregate metric masks occlusion-specific differences; (M2) joint-angle error (RMSE/MAE/P95) against angles derived from ground-truth keypoints, plus knee-valgus detection consistency (Cohen's $\kappa$); and (M3) frame-to-frame displacement, median-filter residual jitter, and jump rate under tracking-free per-frame inference, before and after OneEuro smoothing. We executed the protocol on four public datasets (COCO val2017, CrowdPose, OCHuman, PoseTrack18) for two representative models (the official YOLO11s-pose and a model fine-tuned with occlusion-domain data), with all metrics produced by an open-source harness in a single inference pass. $\Delta_{\mathrm{occ}}$ is negative for every model--dataset combination ($-0.24$ to $-0.41$): the aggregate mAP overestimates occluded-scene performance in every combination tested. Joint-angle error is amplified in occluded layers across all tested combinations, and on the occlusion-domain datasets the angle metrics reveal significant differences between the two models that the aggregate mAP cannot localize. We found no evidence of a difference in raw temporal jitter between the two models, while pixel-domain OneEuro smoothing reduces the jump rate by 9--10\% at zero accuracy cost ($|\Delta\mathrm{AP}|\le 0.0002$). Correlation analysis shows that stratified mAP is highly consistent with full mAP (sign-consistency $\tau_s=1.0$, 12/12 pairs)---its value lies in magnitude diagnosis rather than re-ranking---while the angle metrics, particularly knee angle, carry partially independent information ($\rho=0.72$, $p=0.109$, $n=6$, exploratory). The protocol and harness are open-sourced and positioned as a complement to, not a replacement for, OKS-mAP.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -39,7 +39,7 @@ human pose estimation; evaluation protocol; occlusion; joint angle; temporal sta
 
 2D human pose estimation is a fundamental computer vision task whose outputs feed action recognition, motion analysis, and real-time fitness-correction systems. For such applications, the gap between benchmark scores and real-world usability matters more than average precision alone: a model that ranks first on a benchmark can be markedly worse in scenes with occluded people, fast motion, or the need for precise joint-angle judgments---and this difference is invisible in the dominant metric.
 
-The de facto standard evaluation protocol is OKS-mAP as defined by the COCO keypoints protocol~\cite{1}. It matches and scores predictions by Object Keypoint Similarity (OKS) and aggregates over the whole test set into a single scalar. This design has three blind spots. First, OKS aggregation ignores keypoint visibility: visible, occluded, and missing keypoints contribute equally to the same score, so occlusion-specific accuracy differences are diluted by averaging. Second, the protocol does not measure joint angles: OKS penalizes pixel-level keypoint position error, whereas downstream applications (e.g., exercise correction) care about whether the joint angles derived from those keypoints are accurate---and the two are not linearly related. Third, the protocol is blind to temporal behavior: most systems run frame-by-frame independent inference on video, and the jitter of the output between frames directly determines how the downstream consumer perceives it, yet a static-image protocol says nothing about it. Prior work responds to each problem in isolation---OCHuman organizes evaluation by occlusion level~\cite{2}; PoseTrack and SmoothNet extend the static protocol with tracking metrics (MOTA/MOTP) and a temporal-smoothness metric (per-joint acceleration magnitude, Accel), respectively~\cite{3,15}; and the biomechanics community has validated joint angles from markerless pose estimation~\cite{4,5,6}. What is missing is a unified, reproducible, cross-dataset supplementary protocol, and any baseline numbers quantifying how large these three blind spots are on real models.
+The de facto standard evaluation protocol is OKS-mAP as defined by the COCO keypoints protocol~\cite{1}. It matches and scores predictions by Object Keypoint Similarity (OKS) and aggregates over the whole test set into a single scalar. This design has three blind spots. First, OKS aggregation ignores keypoint visibility: visible ($v{=}2$) and occluded ($v{=}1$) keypoints are averaged with equal weight into one score (missing, $v{=}0$, keypoints are excluded from OKS averaging), so occlusion-specific accuracy differences are diluted by averaging. Second, the protocol does not measure joint angles: OKS penalizes pixel-level keypoint position error, whereas downstream applications (e.g., exercise correction) care about whether the joint angles derived from those keypoints are accurate---and the two are not linearly related. Third, the protocol is blind to temporal behavior: most systems run frame-by-frame independent inference on video, and the jitter of the output between frames directly determines how the downstream consumer perceives it, yet a static-image protocol says nothing about it. Prior work responds to each problem in isolation---OCHuman organizes evaluation by occlusion level~\cite{2}; PoseTrack and SmoothNet extend the static protocol with tracking metrics (MOTA/MOTP) and a temporal-smoothness metric (per-joint acceleration magnitude, Accel), respectively~\cite{3,15}; and the biomechanics community has validated joint angles from markerless pose estimation~\cite{4,5,6}. What is missing is a unified, reproducible, cross-dataset supplementary protocol, and any baseline numbers quantifying how large these three blind spots are on real models.
 
 This paper proposes a three-module unified supplementary evaluation protocol (Section~3) and open-sources its execution layer, an eval harness that produces official metrics and protocol metrics from a single inference pass, with three self-check gates. We executed the protocol on four public datasets with two representative models (Sections~4--5) to answer four research questions:
 
@@ -50,7 +50,7 @@ This paper proposes a three-module unified supplementary evaluation protocol (Se
 \item \textbf{RQ4 (protocol economy)}: How do the metrics of the three modules correlate with each other and with full mAP? Is any of them redundant?
 \end{itemize}
 
-Our contributions are threefold: (1) to our knowledge, the first supplementary evaluation scheme that unifies occlusion stratification, angle error, and temporal jitter under one protocol, with explicit statistical conventions (bootstrap confidence intervals) and dataset-consistent stratification rules; (2) an open-source harness and all raw predictions, so that any new model can produce the full set of protocol metrics on the four datasets in one pass; (3) complete baseline numbers for two representative models, quantifying for the first time the magnitude of OKS-mAP's three blind spots (e.g., $\Delta_{\mathrm{occ}}$ as large as $-0.40$ on COCO).
+Our contributions are threefold: (1) to our knowledge, the first supplementary evaluation scheme that unifies occlusion stratification, angle error, and temporal jitter under one protocol, with explicit statistical conventions (bootstrap confidence intervals) and dataset-consistent stratification rules; (2) an open-source harness and all raw predictions, so that any new model can produce the full set of protocol metrics on the four datasets in one pass; (3) complete baseline numbers for two representative models that quantify, for the first time to our knowledge, the magnitude of OKS-mAP's three blind spots (e.g., $\Delta_{\mathrm{occ}}$ as large as $-0.40$ on COCO).
 
 \section{Related Work}
 
@@ -60,7 +60,7 @@ Our contributions are threefold: (1) to our knowledge, the first supplementary e
 
 \textbf{Joint-angle validation.} Biomechanics and sports science have a line of validity studies for markerless pose estimation: Turner et al.\ reconstruct joint-angle trajectories from BlazePose keypoints in 89 resistance-training videos and assess movement-technique quality by frame-wise RMSE against a reference movement~\cite{4}; Panconi et al.\ validate DeepLabCut joint angles in gait analysis~\cite{5}; Pemasiri et al.\ build a gait-analysis framework for biomechanical interpretation~\cite{6}. These studies answer the question ``do estimated angles equal the clinical/marker-based gold standard?'' (validity), and they require dedicated marker or expert annotations. We do not repeat validity validation; instead we use ground-truth-derived angles as a protocol metric for model-to-model comparison. The two lines are complementary rather than competing (Section~6 elaborates this boundary). The knee-valgus threshold takes its magnitude reference from the literature: frontal plane projection angle (FPPA) of 16.0--17.4$^{\circ}$ in a lateral step-down test~\cite{11}.
 
-\textbf{Temporal consistency and smoothing.} Temporal inconsistency of tracking-free per-frame inference has been discussed at a general level by Deep Video Prior and others~\cite{12}; in engineering practice, OneEuro causal filtering is widely used to smooth keypoint trajectories~\cite{13}. Our work turns ``stability of tracking-free raw output'' itself into a protocol metric, and systematically compares two filtering domains (normalized-coordinate vs.\ pixel) in their joint effect on jitter metrics and AP---a comparison that reveals how the choice of filtering domain decides the benefit and cost of smoothing.
+\textbf{Temporal consistency and smoothing.} Temporal inconsistency of tracking-free per-frame inference has been discussed at a general level by Deep Video Prior and others~\cite{12}; in engineering practice, OneEuro causal filtering is widely used to smooth keypoint trajectories~\cite{13}. Our work turns ``stability of tracking-free raw output'' itself into a protocol metric, and compares two filtering domains (normalized-coordinate vs.\ pixel) in their joint effect on jitter metrics and AP---a comparison that reveals how the choice of filtering domain decides the benefit and cost of smoothing.
 
 \section{Protocol Design}
 
@@ -81,7 +81,7 @@ The protocol consists of three modules plus one statistical layer, all built on 
 M1 occlusion stratification & $v$-stratified mAP$^{50-95}$(P) + $\Delta_{\mathrm{occ}}$ & CrowdPose val / OCHuman test / COCO val & RQ1 \\
 M2 angle error & elbow/knee angle RMSE/MAE/P95 + knee-valgus detection consistency ($\kappa$) & same as M1 (angles derived from GT, zero extra annotation) & RQ2 \\
 M3 temporal jitter & frame-to-frame displacement / jitter / jump rate, before and after OneEuro & PoseTrack18 val (tracking-free per-frame inference) & RQ3 \\
-Statistical layer & 10k bootstrap CI + Spearman/Kendall & results of the three modules & RQ4, model comparison \\
+Statistical layer & 10k bootstrap CI + sign-consistency $\tau_s$ + Spearman $\rho$ & results of the three modules & RQ4, model comparison \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -92,7 +92,7 @@ Statistical layer & 10k bootstrap CI + Spearman/Kendall & results of the three m
 
 \textbf{Interpretability evidence.} A layer's AP has all GT persons as its recall denominator, so persons without that layer's keypoints can never contribute TPs to it. We therefore report, per layer, both ``fraction of GT keypoints in this layer'' (gt\_frac) and ``fraction of GT persons possessing this layer's keypoints'' (gt\_person\_frac). In particular, CrowdPose's v2 layer suffers from the 14$\rightarrow$17 mapping truncation (gt\_person\_frac only 0.591), so its v2-layer AP is systematically underestimated---on CrowdPose, cross-layer comparisons between v2 and v1 should use $\Delta_{\mathrm{occ}}$ (which is unaffected by this artifact).
 
-\textbf{Primary metric.} $\Delta_{\mathrm{occ}}=\mathrm{mAP}(v{=}1\ \mathrm{layer})-\mathrm{mAP}(\mathrm{full})$; a negative value means the full metric overestimates occluded-scene performance. Per-layer mAP and gt\_frac are reported alongside.
+\textbf{Primary metric.} $\Delta_{\mathrm{occ}}=\mathrm{mAP}(v{=}1\ \mathrm{layer})-\mathrm{mAP}(\mathrm{full})$; a negative value means the full metric overestimates occluded-scene performance. Both terms are computed over the same image universe and the same full GT person set (the $v{=}1$ layer's recall denominator is the full GT person set, see Interpretability evidence), so $\Delta_{\mathrm{occ}}$ isolates the occlusion layer's contribution gap rather than a change in denominator. Per-layer mAP and gt\_frac are reported alongside.
 
 \subsection{M2: Angle Error}
 
@@ -117,7 +117,7 @@ right knee & 14 & 12, 16 \\
 
 \textbf{Validity mask.} GT angle: all three GT points must have $v>0$. Predicted angle: the same three GT points must have $v>0$ and the predicted confidence must be $>0$---this keeps GT and predictions comparable on the same domain and avoids biasing toward missing predictions. Per-instance error $e=\theta_{\mathrm{pred}}-\theta_{\mathrm{gt}}$; we report RMSE, MAE, and P95, stratified by the vertex's GT visibility into $v{=}2$/$v{=}1$ layers, in linkage with M1.
 
-\textbf{Knee-valgus detection consistency.} The knee-valgus angle $\phi$ is defined as the image-plane angle between the hip$\rightarrow$knee vector and the hip$\rightarrow$ankle vector (how far the knee point deviates from the hip--ankle axis), computed only for instances where all three points have $v>0$. $\phi_{\mathrm{pred}}$ and $\phi_{\mathrm{GT}}$ are binarized at a threshold $\tau$ (default $\tau=15^{\circ}$, sensitivity analysis $\tau\in\{10^{\circ},17^{\circ}\}$), and we report detection sensitivity, specificity, and Cohen's $\kappa$ with GT as the gold standard. Two clarifications: we do not report absolute detection rates (static datasets mix viewpoints, making absolute rates meaningless; consistency is what the protocol can measure); and $\phi$ is a 2D image-plane proxy under arbitrary viewpoints, whereas the FPPA literature values come from a standardized frontal camera~\cite{11}---our datasets mix viewpoints, so $\tau$ takes only a magnitude reference from the literature and carries no clinical-diagnostic meaning.
+\textbf{Knee-valgus detection consistency.} The knee-valgus angle $\phi$ is defined as the image-plane angle between the hip$\rightarrow$knee vector and the hip$\rightarrow$ankle vector (how far the knee point deviates from the hip--ankle axis), computed only for instances where all three points have $v>0$. $\phi_{\mathrm{pred}}$ and $\phi_{\mathrm{GT}}$ are binarized at a threshold $\tau_\varphi$ (default $\tau_\varphi=15^{\circ}$, sensitivity analysis $\tau_\varphi\in\{10^{\circ},17^{\circ}\}$), and we report detection sensitivity, specificity, and Cohen's $\kappa$ with GT as the gold standard. Two clarifications: we do not report absolute detection rates (static datasets mix viewpoints, making absolute rates meaningless; consistency is what the protocol can measure); and $\phi$ is a 2D image-plane proxy under arbitrary viewpoints, whereas the FPPA literature values come from a standardized frontal camera~\cite{11}---our datasets mix viewpoints, so $\tau_\varphi$ takes only a magnitude reference from the literature and carries no clinical-diagnostic meaning.
 
 \subsection{M3: Temporal Jitter}
 
@@ -128,7 +128,7 @@ right knee & 14 & 12, 16 \\
 \begin{enumerate}
 \item frame-to-frame displacement $d_t=\lVert\mathbf{p}_t-\mathbf{p}_{t-1}\rVert_2/s_t$: report mean and P95;
 \item jitter $j_t=\lVert\mathbf{p}_t-\hat{\mathbf{s}}_t\rVert_2/s_t$, where $\hat{\mathbf{s}}$ is the trajectory after a causal 5-frame median filter: targets high-frequency noise (core metric);
-\item jump rate: fraction of frames with $d_t>\tau$, default $\tau=0.10$ (10\% of person-box scale), sensitivity $\tau\in\{0.05,0.20\}$.
+\item jump rate: fraction of frames with $d_t>\tau_j$, default $\tau_j=0.10$ (10\% of person-box scale), sensitivity $\tau_j\in\{0.05,0.20\}$.
 \end{enumerate}
 
 \textbf{Before/after OneEuro comparison.} A causal OneEuro filter is applied offline to $\mathbf{p}_t$ with parameters fixed at Casiez's defaults (min\_cutoff$=1.0$, beta$=0.007$, d\_cutoff$=1.0$)~\cite{13}. The three metrics and the matched-scope AP are recomputed after smoothing, and the accuracy cost is reported. Two filtering domains are used: the normalized-coordinate domain (q domain, the protocol's original design) and the pixel domain. The empirical finding (consistent across both models): filtering in the q domain re-injects the GT person box's per-frame scale noise ($|s_t/s_{t-1}-1|$, median 0.97\%, P95 8.1\%) into the pixel domain during de-normalization, so jitter metrics rise rather than fall and AP drops slightly; direct pixel-domain filtering costs zero AP and lowers all three metrics. \textbf{We adopt the pixel domain as the primary convention}, and report the q domain as a sensitivity convention (Table~\ref{tab:m3}, two columns).
@@ -138,60 +138,66 @@ right knee & 14 & 12, 16 \\
 \begin{itemize}
 \item Model comparison: M1/M2 resample at image level and M3 at track-segment level, 10,000 bootstrap replicates (seed 42); we report 95\% percentile CIs of the difference $\Delta$ and judge significance by whether the CI excludes 0. M1 is a paired design (shared image universe $=$ the union of GT and predicted images of both models); the valid unit sets of M2/M3 differ with matching results, so they use independent resampling, as noted in the protocol.
 \item The comparison list is fixed before the experiments (2 models $\times$ 3 datasets $\times$ layers/joints/metrics); every entry is reported with its CI, with no selection of favorable results.
-\item RQ4: on (dataset $\times$ layer) cells we compute the Kendall $\tau$ (sign consistency) between protocol-metric differences and full-mAP differences, and the Spearman $\rho$ between metric differences. Cell count $n=6$ (3 datasets $\times$ 2 layers), extended to $n=24$ at joint level; this analysis is exploratory and the sample size is stated in the main text.
+\item RQ4 (protocol economy): on (dataset $\times$ layer) cells we compute the sign-consistency $\tau_s$ between protocol-metric differences and full-mAP differences, and the Spearman $\rho$ between the two difference vectors. $\tau_s$ counts concordant pairs among all pairwise cell comparisons, excluding pairs whose two cells share an identical full-mAP difference (a tie, for which sign consistency is undefined): at $n=6$ (3 datasets $\times$ 2 layers), 15 pairwise comparisons minus the 3 same-dataset layer pairs $=$ 12 reported pairs; at the joint level ($n=24$: 3 datasets $\times$ 4 joints $\times$ 2 layers), 276 pairwise comparisons minus 84 same-dataset same-joint layer pairs (3 $\times$ 28) $=$ 192 reported pairs. Both analyses are exploratory, and the sample size is stated in the main text.
 \end{itemize}
 
 \subsection{Harness and Reproducibility}
 
-The execution layer is an open-source eval harness: \texttt{model.val(save\_json=True)} produces official metrics and prediction JSONs in a single inference pass; the M1/M2/M3 engines are purely offline (NumPy) and do not touch the GPU. Three gates guarantee the conventions are implemented correctly (see 3.1). The reproducibility contract (environment, weights, data, step-by-step commands, convention notes) is in the repository's REPRODUCIBILITY.md. The protocol's JSON contract (schema\_version$=$1) is available for downstream plotting and secondary analysis.
+The execution layer is an open-source eval harness: \texttt{model.val(save\_json=True)} produces official metrics and prediction JSONs in a single inference pass; the M1/M2/M3 engines are purely offline (NumPy) and do not touch the GPU. Three gates guarantee the conventions are implemented correctly (see 3.1). The reproducibility contract (environment, weights, data, step-by-step commands, convention notes) is in the repository's REPRODUCIBILITY.md. The protocol's JSON contract (schema\_version$=$1) is available for downstream plotting and secondary analysis. The harness and this paper's source are open-sourced at \url{https://github.com/fanyifan090409-dev/pose-eval-harness} and \url{https://github.com/fanyifan090409-dev/elthan-pose-research}; the training fork (ultralytics-based) is at \url{https://github.com/fanyifan090409-dev/elthan-pose}.
 
 \section{Experimental Setup}
 
 \textbf{Datasets.} Four public datasets: COCO val2017 (general-domain control; $v$ distribution 55.4\%/7.8\%/36.8\% for $v{=}2/1/0$), CrowdPose val (crowded/occlusion domain; $v{=}1$ marks real occlusion; distribution 22.5\%/30.8\%/remainder), OCHuman test (heavy-occlusion domain; distribution 69.2\%/14.3\%/remainder), PoseTrack18 val (video temporal; 170 videos / 8,923 annotated frames; GT $v\in\{0,1\}$, where $v{=}0$ is a (0,0) placeholder). All datasets are unified under the COCO17 keypoint format. PoseTrack was obtained under MPII's official academic license and is used for academic evaluation only.
 
-\textbf{Models.} Two baseline models: (1) the official YOLO11s-pose pretrained weights~\cite{14}; (2) round5-3, obtained by fine-tuning YOLO11s-pose on public datasets including COCO, MPII, CrowdPose, and OCHuman, representing training with occlusion-domain data. The two share the same architecture and inference configuration and differ only in training data, making them suitable for testing whether the protocol is sensitive to training-data differences.
+\textbf{Models.} Two baseline models: (1) the official YOLO11s-pose pretrained weights~\cite{14}; (2) round5-3, obtained by fine-tuning YOLO11s-pose on public datasets including COCO, MPII, CrowdPose, and OCHuman, representing training with occlusion-domain data. The two share the same architecture and inference configuration and differ only in training data, making them suitable for testing whether the protocol is sensitive to training-data differences. round5-3's training data is restricted to training splits (COCO train2017, MPII train, CrowdPose train, OCHuman train, plus OpenThermalPose train at controlled proportion); none of the four evaluation splits used in this paper (COCO val2017, CrowdPose val, OCHuman test, PoseTrack18 val) appears in its training data, so the protocol numbers are leak-free.
 
-\textbf{Inference and conventions.} $640\times640$ input, frame-by-frame independent inference, predictions saved with save\_json. All mAP numbers use the official released-numbers convention of pycocotools 2.0.11. Note that this convention can differ from ultralytics' internal evaluator by more than 20 points (sources: GTs with num\_keypoints$=$0 marked ignore, the OKS doubled-bbox fallback, maxDets$=$20); every table in the paper states its convention. PoseTrack has no official pycocotools reference, so its official numbers are reported only under the internal-evaluator convention (round5-3 0.1085 / YOLO11s-pose 0.1213 mAP$^{50-95}$(P)).
+\textbf{Inference and conventions.} $640\times640$ input, frame-by-frame independent inference, predictions saved with save\_json. All mAP numbers use the official released-numbers convention of pycocotools 2.0.11, whose doubled-bbox fallback scores a GT keypoint with $vg>0$ but zero keypoint area ($k_1=0$, the COCO (0,0) placeholder) using a bbox-derived scale rather than dropping it. Note that this convention can differ from ultralytics' internal evaluator by more than 20 points (sources: GTs with num\_keypoints$=$0 marked ignore, the OKS doubled-bbox fallback, maxDets$=$20); every table in the paper states its convention. PoseTrack has no official pycocotools reference, so its official numbers are reported only under the internal-evaluator convention (round5-3 0.1085 / YOLO11s-pose 0.1213 mAP$^{50-95}$(P)). Gate 1 (agreement with the official library) measured $\le 0.0001$ on all six model--dataset cells (exactly 0 on five).
 
 \section{Results}
 
 \subsection{RQ1: Full mAP Masks Occlusion Differences}
 
-Table~\ref{tab:m1} gives the stratified mAP of the two models on three datasets. Three observations.
+Table~\ref{tab:m1} gives the stratified mAP of the two models on three datasets, together with the layer-representativeness evidence gt\_frac and gt\_person\_frac; Fig.~\ref{fig:m1} visualizes the stratification. Three observations.
 
 \begin{table}[t]
 \centering
-\caption{M1 stratified mAP$^{50-95}$(P) (pycocotools 2.0.11 convention). Bold $=$ significantly better (bootstrap CI excludes 0). CrowdPose's v2 layer is affected by the 14$\rightarrow$17 mapping truncation (gt\_person\_frac 0.591); cross-layer comparisons use $\Delta_{\mathrm{occ}}$.}
+\caption{M1 stratified mAP$^{50-95}$(P) (pycocotools 2.0.11 convention). Bold $=$ significantly better (bootstrap CI excludes 0). gt\_frac $=$ fraction of GT keypoints in the layer; gt\_person\_frac $=$ fraction of GT persons possessing at least one keypoint of the layer (both are GT properties, identical for the two models). $\Delta_{\mathrm{occ}}=$ mAP($v{=}1$ layer) $-$ mAP(full) on the same full GT person set (Section 3.1); its bootstrap CIs are in Appendix~A. --- $=$ not defined for this layer. CrowdPose's v2 layer is affected by the 14$\rightarrow$17 mapping truncation (gt\_person\_frac 0.591); cross-layer comparisons use $\Delta_{\mathrm{occ}}$.}
 \label{tab:m1}
 \renewcommand{\arraystretch}{1.15}
 \resizebox{\columnwidth}{!}{%
-\begin{tabular}{lcccccc}
+\begin{tabular}{lccccccc}
 \toprule
-\textbf{Dataset} & \textbf{Model} & \textbf{Full} & \textbf{$v{=}2$ layer} & \textbf{$v{=}1$ layer} & \textbf{$v{=}0$ layer} & \textbf{$\Delta_{\mathrm{occ}}$} \\
+\textbf{Dataset} & \textbf{Layer} & \textbf{round5-3} & \textbf{YOLO11s-pose} & \textbf{$\Delta_{\mathrm{occ}}$ (r5-3)} & \textbf{$\Delta_{\mathrm{occ}}$ (YOLO)} & \textbf{gt\_frac} & \textbf{gt\_person\_frac} \\
 \midrule
-COCO val & round5-3 & 0.5712 & 0.5637 & 0.1747 & 0 & \textbf{$-0.3965$} \\
- & YOLO11s-pose & \textbf{0.5816} & \textbf{0.5728} & 0.1719 & 0 & $-0.4097$ \\
-CrowdPose val & round5-3 & \textbf{0.7626} & \textbf{0.4183} & \textbf{0.5183} & 0 & $-0.2443$ \\
- & YOLO11s-pose & 0.6938 & 0.3768 & 0.4573 & 0 & $-0.2366$ \\
-OCHuman test & round5-3 & \textbf{0.4775} & \textbf{0.4696} & \textbf{0.1819} & 0 & $-0.2955$ \\
- & YOLO11s-pose & 0.3379 & 0.3314 & 0.0765 & 0 & $-0.2614$ \\
+COCO val & full & 0.5712 & \textbf{0.5816} & --- & --- & 1.000 & 1.000 \\
+ & $v{=}2$ & 0.5637 & \textbf{0.5728} & --- & --- & 0.554 & 0.988 \\
+ & $v{=}1$ & 0.1747 & 0.1719 & $-0.3965$ & $-0.4097$ & 0.078 & 0.564 \\
+ & $v{=}0$ & 0 & 0 & --- & --- & 0.368 & 0.947 \\
+CrowdPose val & full & \textbf{0.7626} & 0.6938 & --- & --- & 1.000 & 1.000 \\
+ & $v{=}2$ & \textbf{0.4183} & 0.3768 & --- & --- & 0.225 & 0.591 \\
+ & $v{=}1$ & \textbf{0.5183} & 0.4573 & $-0.2443$ & $-0.2366$ & 0.308 & 0.776 \\
+ & $v{=}0$ & 0 & 0 & --- & --- & 0.467 & 1.000 \\
+OCHuman test & full & \textbf{0.4775} & 0.3379 & --- & --- & 1.000 & 1.000 \\
+ & $v{=}2$ & \textbf{0.4696} & 0.3314 & --- & --- & 0.692 & 1.000 \\
+ & $v{=}1$ & \textbf{0.1819} & 0.0765 & $-0.2955$ & $-0.2614$ & 0.143 & 0.736 \\
+ & $v{=}0$ & 0 & 0 & --- & --- & 0.164 & 0.902 \\
 \bottomrule
 \end{tabular}}
 \end{table}
 
-First, \textbf{$\Delta_{\mathrm{occ}}$ is negative everywhere and large in magnitude}: $-0.40$ and $-0.41$ on COCO, $-0.24$ on CrowdPose, and $-0.26$ to $-0.30$ on OCHuman. Full mAP systematically overestimates occluded-scene performance by 24--41 points---a magnitude that can mask substantive differences in any model selection that relies on mAP.
+First, \textbf{$\Delta_{\mathrm{occ}}$ is negative everywhere and large in magnitude}: $-0.40$ and $-0.41$ on COCO, $-0.24$ on CrowdPose, and $-0.26$ to $-0.30$ on OCHuman. In every combination tested, full mAP overestimates occluded-scene performance by 24--41 points---a magnitude that can mask substantive differences in model selection that relies on mAP alone.
 
-Second, \textbf{stratification changes the strength of model-comparison conclusions}. On general-domain COCO, YOLO11s-pose is significantly better in full and $v{=}2$-layer mAP ($\Delta=+0.0104$, 95\% CI $[0.0059,0.0155]$), but the $v{=}1$ layer shows no significant difference ($\Delta=-0.0028$, ns)---the significant advantage in the aggregate comes almost entirely from visible keypoints. On the occlusion-domain datasets, round5-3 is significantly better in all three layers (CrowdPose full $\Delta=-0.0687$, OCHuman full $\Delta=-0.1396$, 95\% CIs exclude 0), and the gain from occlusion-domain training is equally significant in the $v{=}1$ layer (OCHuman v1 $\Delta=-0.1054$).
+Second, \textbf{stratification changes the strength of model-comparison conclusions}. On general-domain COCO, YOLO11s-pose is significantly better in full and $v{=}2$-layer mAP ($\Delta=+0.0104$, 95\% CI $[0.0059,0.0155]$), but we found no evidence of a $v{=}1$-layer difference ($\Delta=-0.0028$, ns)---the significant advantage in the aggregate comes almost entirely from visible keypoints. On the occlusion-domain datasets, round5-3 is significantly better in all three layers (CrowdPose full $\Delta=-0.0687$, OCHuman full $\Delta=-0.1396$, 95\% CIs exclude 0), and the gain from occlusion-domain training is equally significant in the $v{=}1$ layer (OCHuman v1 $\Delta=-0.1055$).
 
 Third, \textbf{the $v{=}0$ layer is uniformly 0} (both models, three datasets), confirming the protocol's expectation: missing keypoints cannot be estimated; the layer is kept as completeness evidence, not for ranking.
 
 \subsection{RQ2: Angle Error and Knee-Valgus Detection Consistency}
 
-Table~\ref{tab:m2} gives elbow/knee angle RMSE with left and right sides pooled (stratified by $v{=}2$/$v{=}1$). Three observations.
+Table~\ref{tab:m2} gives elbow/knee angle RMSE with left and right sides pooled (stratified by $v{=}2$/$v{=}1$); Fig.~\ref{fig:m2} shows the per-joint error distributions ($v{=}2$ layer). Three observations.
 
 \begin{table}[t]
 \centering
-\caption{M2 joint-angle RMSE ($^{\circ}$, left/right pooled by sample count). Bold $=$ significantly better (bootstrap CI excludes 0).}
+\caption{M2 joint-angle RMSE ($^{\circ}$, left/right pooled by sample count). Bold $=$ significantly better (bootstrap CI excludes 0); per-comparison CIs are in Appendix~A (Table~A3).}
 \label{tab:m2}
 \renewcommand{\arraystretch}{1.15}
 \resizebox{\columnwidth}{!}{%
@@ -211,38 +217,37 @@ OCHuman test & round5-3 & \textbf{35.6} & \textbf{45.7} & \textbf{24.3} & \textb
 
 First, \textbf{angle error is systematically amplified by occlusion}: in every model--dataset combination, $v{=}1$-layer RMSE exceeds $v{=}2$-layer RMSE (elbow $+5.7^{\circ}$ to $+18.1^{\circ}$, knee $+5.3^{\circ}$ to $+11.4^{\circ}$), with the largest layer gaps in the heavy-occlusion domain (OCHuman). This aligns with M1's $\Delta_{\mathrm{occ}}$ observation; the two corroborate each other.
 
-Second, \textbf{the angle metrics separate information that full mAP cannot}. On general-domain COCO the two models show no significant angle difference (consistent with the 1-point mAP gap); but on the occlusion domains round5-3 is systematically more accurate in the $v{=}1$ layer: CrowdPose elbow 31.6$^{\circ}$ vs.\ 35.0$^{\circ}$, knee 25.9$^{\circ}$ vs.\ 30.5$^{\circ}$ (both significant); OCHuman elbow 45.7$^{\circ}$ vs.\ 57.7$^{\circ}$, knee 32.0$^{\circ}$ vs.\ 39.7$^{\circ}$ (all significant). Note that on OCHuman the $v{=}2$-layer angle difference is also significant, indicating that the benefit of occlusion-domain training is not limited to occluded keypoints themselves.
+Second, \textbf{the angle metrics separate information that full mAP cannot}. On general-domain COCO we found no evidence of an angle difference between the two models (consistent with the 1-point mAP gap); but on the occlusion domains round5-3 is more accurate in the $v{=}1$ layer in every tested comparison: CrowdPose elbow 31.6$^{\circ}$ vs.\ 35.0$^{\circ}$, knee 25.9$^{\circ}$ vs.\ 30.5$^{\circ}$ (both significant); OCHuman elbow 45.7$^{\circ}$ vs.\ 57.7$^{\circ}$, knee 32.0$^{\circ}$ vs.\ 39.7$^{\circ}$ (all significant). Note that on OCHuman the $v{=}2$-layer angle difference is also significant, indicating that the benefit of occlusion-domain training is not limited to occluded keypoints themselves.
 
-Third, \textbf{knee-valgus detection consistency} (Table~\ref{tab:kappa}): round5-3's $\kappa$ exceeds YOLO11s-pose's on all three datasets (COCO 0.759 vs.\ 0.745; CrowdPose 0.739 vs.\ 0.669; OCHuman 0.602 vs.\ 0.519), and the conclusion is stable under threshold sensitivity analysis ($\tau\in\{10^{\circ},17^{\circ}\}$). Both models' $\kappa$ on OCHuman are low ($<0.61$), suggesting that $\phi$'s measurement noise rises under heavy occlusion.
+Third, \textbf{knee-valgus detection consistency} (Table~\ref{tab:kappa}): round5-3's $\kappa$ exceeds YOLO11s-pose's on all three datasets at $\tau_\varphi{=}15^{\circ}$ (COCO 0.759 vs.\ 0.745; CrowdPose 0.739 vs.\ 0.669; OCHuman 0.602 vs.\ 0.519), and the conclusion is stable under threshold sensitivity analysis ($\tau_\varphi\in\{10^{\circ},17^{\circ}\}$). Bootstrap CIs (Appendix~A, Table~A4) establish the CrowdPose and OCHuman gaps as significant ($\Delta\kappa$ $-0.069$ [$-0.098$, $-0.041$] and $-0.084$ [$-0.121$, $-0.046$]), whereas the COCO gap is directionally consistent but not significant ($\Delta\kappa$ $-0.014$ [$-0.045$, $0.016$]). Both models' $\kappa$ on OCHuman are low ($<0.61$), suggesting that $\phi$'s measurement noise rises under heavy occlusion.
 
 \begin{table}[t]
 \centering
-\caption{Knee-valgus detection consistency (binarized $\phi$ vs.\ GT).}
+\caption{Knee-valgus detection consistency (binarized $\phi$ vs.\ GT). Bold $=$ higher value (round5-3); bootstrap CIs for $\kappa$ and for the model difference are in Appendix~A.}
 \label{tab:kappa}
 \renewcommand{\arraystretch}{1.15}
-\begin{tabular}{lcccc}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lccccc}
 \toprule
-\textbf{Dataset} & \textbf{Model} & \textbf{$\tau{=}10^{\circ}$ $\kappa$} & \textbf{$\tau{=}15^{\circ}$ $\kappa$} & \textbf{$\tau{=}17^{\circ}$ $\kappa$} \\
+\textbf{Dataset} & \textbf{Model} & \textbf{$\tau_\varphi{=}10^{\circ}$ $\kappa$} & \textbf{$\tau_\varphi{=}15^{\circ}$ $\kappa$} & \textbf{$\tau_\varphi{=}17^{\circ}$ $\kappa$} & \textbf{$\tau_\varphi{=}15^{\circ}$ sens./spec.} \\
 \midrule
-COCO val & round5-3 & 0.724 & \textbf{0.759} & 0.773 \\
- & YOLO11s-pose & 0.697 & 0.745 & 0.759 \\
-CrowdPose val & round5-3 & 0.711 & \textbf{0.739} & 0.731 \\
- & YOLO11s-pose & 0.666 & 0.669 & 0.665 \\
-OCHuman test & round5-3 & 0.601 & \textbf{0.602} & 0.603 \\
- & YOLO11s-pose & 0.529 & 0.519 & 0.502 \\
+COCO val & round5-3 & 0.724 & \textbf{0.759} & 0.773 & 0.790/0.950 \\
+ & YOLO11s-pose & 0.697 & 0.745 & 0.759 & 0.783/0.943 \\
+CrowdPose val & round5-3 & 0.711 & \textbf{0.739} & 0.731 & 0.785/0.937 \\
+ & YOLO11s-pose & 0.666 & 0.669 & 0.665 & 0.722/0.926 \\
+OCHuman test & round5-3 & 0.601 & \textbf{0.602} & 0.603 & 0.646/0.926 \\
+ & YOLO11s-pose & 0.529 & 0.519 & 0.502 & 0.592/0.900 \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}
-
-Table~\ref{tab:kappa} also reports $\tau{=}15^{\circ}$ sensitivity/specificity: COCO val round5-3 0.790/0.950 vs.\ YOLO11s-pose 0.783/0.943; CrowdPose val 0.785/0.937 vs.\ 0.722/0.926; OCHuman test 0.646/0.926 vs.\ 0.592/0.900.
 
 \subsection{RQ3: Temporal Stability of Tracking-Free Inference and the Cost of Smoothing}
 
-On PoseTrack18 val the two models yield 704 / 728 track segments (161 / 160 videos, median segment length 31 frames). Table~\ref{tab:m3} gives the overall three metrics after person-scale normalization, plus the AP cost of smoothing.
+On PoseTrack18 val the two models yield 704 / 728 track segments (161 / 160 videos, median segment length 31 frames). Table~\ref{tab:m3} gives the overall three metrics after person-scale normalization, plus the AP cost of smoothing; Fig.~\ref{fig:m3} shows an example track.
 
 \begin{table}[t]
 \centering
-\caption{M3 temporal metrics (overall, averaged over 17 keypoints) and smoothing AP cost (matched-scope AP; raw values: round5-3 0.1316 / YOLO11s-pose 0.1408).}
+\caption{M3 temporal metrics (overall, averaged over 17 keypoints) and smoothing AP cost. Matched-scope AP is the AP recomputed over the same matched track frames used for the jitter metrics (raw values: round5-3 0.1316 / YOLO11s-pose 0.1408); --- $=$ raw reference, no smoothing applied. Bold AP cost $=$ within $\pm0.0002$ of zero (zero accuracy cost). Per-metric domain-difference and between-model CIs are in Appendix~A (Table~A5).}
 \label{tab:m3}
 \renewcommand{\arraystretch}{1.15}
 \resizebox{\columnwidth}{!}{%
@@ -260,29 +265,89 @@ YOLO11s-pose & raw & 0.0430 & 0.0535 & 0.2153 & 0.0777 & --- \\
 \end{tabular}}
 \end{table}
 
-Three observations. First, \textbf{the two models show no significant difference in raw temporal stability}: the bootstrap CIs of all seven metrics (disp/jitter means and P95s, three jump-rate thresholds) include 0. Occlusion-domain training data did not change temporal stability---``occlusion training does not affect temporal behavior'' is itself an informative result, suggesting that data-side interventions should be considered separately from temporal post-processing.
+Three observations. First, \textbf{we found no evidence of a difference in raw temporal stability between the two models}: the bootstrap CIs of all seven metrics (disp/jitter means and P95s, three jump-rate thresholds) include 0. We found no evidence that occlusion-domain training data changed temporal stability---``no evidence that occlusion training affects temporal behavior'' is itself an informative result, suggesting that data-side interventions should be considered separately from temporal post-processing.
 
-Second, \textbf{pixel-domain OneEuro smoothing buys stability at zero accuracy cost}: the jump rate ($\tau=0.05$) drops by 9.3\% (round5-3) and 9.8\% (YOLO11s-pose) relative, frame-to-frame displacement mean drops by about 7\%, and AP changes stay within $\pm0.0002$. Third, \textbf{q-domain smoothing backfires}: all three metrics rise (jump\_0.05 to 0.2200/0.2336) and AP drops slightly---the GT person box's per-frame scale noise is re-injected into the pixel domain during de-normalization (mechanism in 3.3). This comparison shows that when smoothing tracking-free per-frame outputs, the choice of filtering domain decides the benefit; the protocol therefore fixes the pixel domain as the primary convention.
+Second, \textbf{pixel-domain OneEuro smoothing buys stability at zero accuracy cost}: the jump rate ($\tau_j=0.05$) drops by 9.3\% (round5-3) and 9.7\% (YOLO11s-pose) relative, frame-to-frame displacement mean drops by about 7\%, and AP changes stay within $\pm0.0002$. Third, \textbf{q-domain smoothing backfires}: all three metrics rise (jump\_0.05 to 0.2200/0.2336) and AP drops slightly---the GT person box's per-frame scale noise is re-injected into the pixel domain during de-normalization (mechanism in 3.3). This comparison shows that when smoothing tracking-free per-frame outputs, the choice of filtering domain decides the benefit; the protocol therefore fixes the pixel domain as the primary convention.
 
 \subsection{RQ4: Correlations Among Metrics}
 
-On the (dataset $\times$ layer) cells ($n=6$), sign consistency (Kendall $\tau$) between protocol-metric differences ($\Delta=$ YOLO11s-pose $-$ round5-3, with RMSE differences sign-flipped so that positive always means YOLO11s-pose is better) and full-mAP differences: stratified mAP $\tau=1.0$ (12/12 pairs), elbow-angle RMSE $\tau=1.0$ (12/12), knee-angle RMSE $\tau=0.667$ (10/12); extended to 24 joint-level cells, $\tau=0.719$ (165/192). Spearman correlations: full $\Delta$ vs.\ stratified $\Delta$ $\rho=0.956$ ($p=0.003$); vs.\ elbow angle $\rho=0.956$ ($p=0.003$); vs.\ knee angle $\rho=0.717$ ($p=0.109$); elbow vs.\ knee $\rho=0.771$ ($p=0.072$).
+On the (dataset $\times$ layer) cells ($n=6$), we compute the sign-consistency $\tau_s$ between protocol-metric differences ($\Delta=$ YOLO11s-pose $-$ round5-3, with RMSE differences sign-flipped so that positive always means YOLO11s-pose is better) and full-mAP differences, counting only the 12 pairs with distinct full-mAP differences (Section~3.4): stratified mAP $\tau_s=1.0$ (12/12 pairs), elbow-angle RMSE $\tau_s=1.0$ (12/12), knee-angle RMSE $\tau_s=0.667$ (10/12); extended to 24 joint-level cells, $\tau_s=0.719$ (165/192). Spearman $\rho$ between the same difference vectors: full $\Delta$ vs.\ stratified $\Delta$, $\rho=0.956$ ($p=0.003$); full $\Delta$ vs.\ elbow angle, $\rho=0.956$ ($p=0.003$); full $\Delta$ vs.\ knee angle, $\rho=0.717$ ($p=0.109$); elbow vs.\ knee, $\rho=0.771$ ($p=0.072$). The two identical $\rho=0.956$ values are not a transcription error: the stratified-mAP and elbow-angle difference vectors rank the six cells identically, and the only rank differences between either of them and the full-mAP differences occur within the two layers of the same dataset, which share an identical full-mAP difference (a tie), leaving Spearman's numerator unchanged in both cases.
 
-Two interpretations (exploratory; $n=6$ stated as-is). First, \textbf{stratified mAP's ranking information is highly consistent with full mAP}; its protocol value lies not in re-ranking but in magnitude diagnosis---the ``how much is masked'' that $\Delta_{\mathrm{occ}}$ provides is something a scalar mAP cannot give. Second, \textbf{the angle metrics carry partially independent information}: knee-angle RMSE's correlation with full AP does not reach significance, and on COCO the directions diverge (round5-3 has better knee angles yet lower full mAP; Table~\ref{tab:m2})---the angle protocol captures a dimension of difference beyond OKS. For protocol economy: stratified mAP and angle error are not redundant; each captures a different blind spot. The temporal metric has cells from only one dataset and awaits testing on more data.
+Two interpretations (exploratory; $n=6$ stated as-is). First, \textbf{stratified mAP's ranking information is perfectly sign-consistent with full mAP ($\tau_s=1.0$)}; its protocol value lies not in re-ranking but in magnitude diagnosis---the ``how much is masked'' that $\Delta_{\mathrm{occ}}$ provides is something a scalar mAP cannot give. Second, \textbf{the angle metrics carry partially independent information}: knee-angle RMSE's correlation with full AP does not reach significance, and on COCO the directions diverge (round5-3 has better knee angles yet lower full mAP; Table~\ref{tab:m2})---the angle protocol captures a dimension of difference beyond OKS. For protocol economy: stratified mAP and angle error are not redundant; each captures a different blind spot. The temporal metric has cells from only one dataset and awaits testing on more data.
 
 \section{Discussion}
 
-\textbf{The magnitude of the three blind spots is quantified for the first time under one protocol.} The consistent observation across four datasets and two models is: full mAP's overestimation of occluded-scene performance ($\Delta_{\mathrm{occ}}$ $-0.24$ to $-0.41$), occlusion's amplification of angle error ($v{=}1$-layer elbow RMSE up to $+18.1^{\circ}$), and the high-frequency jitter of tracking-free per-frame outputs (jump rate $\approx0.21$, reducible by about 10\% at zero cost with pixel-domain smoothing). Together these numbers show that model selection driven solely by OKS-mAP can misjudge strength precisely in the scenarios where reliability matters most (occlusion, fast motion) relative to what the stratified evidence shows.
+\textbf{The magnitude of the three blind spots is quantified, to our knowledge for the first time, under one protocol.} The consistent observation across four datasets and two models is: full mAP's overestimation of occluded-scene performance ($\Delta_{\mathrm{occ}}$ $-0.24$ to $-0.41$), occlusion's amplification of angle error ($v{=}1$-layer elbow RMSE up to $+18.1^{\circ}$), and the high-frequency jitter of tracking-free per-frame outputs (jump rate $\approx0.21$, reducible by about 10\% at zero cost with pixel-domain smoothing). Together these numbers show that model selection driven solely by OKS-mAP can misjudge the relative strength of the two models tested precisely in the scenarios where reliability matters most (occlusion, fast motion) relative to what the stratified evidence shows.
 
 \textbf{The boundary between the angle protocol and validity studies.} Our angle metrics use ground-truth-derived angles as the reference and answer ``which model's joint angles are closer to the annotated truth''---a model-comparison tool. They do not validate ``do estimated angles equal a clinical gold standard'', which is the task of the markerless validity literature~\cite{4,5,6} and requires markers or expert annotations. The two are complementary: validity studies certify that a specific model is trustworthy in a specific scenario, while our protocol gives any new model comparable angle-dimension scores on standard datasets. Likewise, the knee-valgus detection consistency ($\kappa$ up to 0.76) asserts only ``consistency with GT annotations'', not clinical meaning.
 
 \textbf{Engineering implications of the temporal metrics.} M3's two findings directly guide system design: first, data-side interventions (occlusion training) do not change temporal stability, so temporal quality must be handled separately; second, the choice of smoothing domain decides the benefit---normalized-domain filtering looks theoretically correct but fails in practice due to the re-injection of GT-box scale noise. The protocol fixes the pixel domain as the primary convention and recommends that any temporal smoothing method report the joint ``jitter before/after + AP cost'' table.
 
-\textbf{Limitations.} (1) The baseline covers only two models of the same architecture; we do not claim coverage of the model space---the protocol's value is its conventions and tooling, and baseline numbers for more models are left to future work. (2) CrowdPose's v2 layer is affected by the 14$\rightarrow$17 mapping truncation; on that dataset, cross-layer comparisons use $\Delta_{\mathrm{occ}}$. (3) Angles are 2D image-plane angles affected by viewpoint; they are not 3D joint angles or clinical angles. (4) M3 covers a single dataset; the generality of the temporal conclusions awaits extension. (5) RQ4's correlation analysis has small cell counts ($n=6$) and is exploratory. (6) COCO's $v{=}1$ layer is only 7.8\% of keypoints, so its $v{=}1$-layer estimates have larger variance (wider CIs). The convention behind every number (pycocotools 2.0.11) is stated in the tables.
+\textbf{Limitations.} (1) The baseline covers only two models of the same architecture; we do not claim coverage of the model space---the protocol's value is its conventions and tooling, and baseline numbers for more models are left to future work. (2) CrowdPose's v2 layer is affected by the 14$\rightarrow$17 mapping truncation; on that dataset, cross-layer comparisons use $\Delta_{\mathrm{occ}}$. (3) Angles are 2D image-plane angles affected by viewpoint; they are not 3D joint angles or clinical angles. (4) M3 covers a single dataset; the generality of the temporal conclusions awaits extension. (5) RQ4's correlation analysis has small cell counts ($n=6$) and is exploratory. (6) COCO's $v{=}1$ layer is only 7.8\% of keypoints, so its $v{=}1$-layer estimates have larger variance (wider CIs). Every table states its evaluation convention: M1/M2 numbers follow pycocotools 2.0.11, while PoseTrack's official-metric numbers (Section~4) are reported under the ultralytics internal-evaluator convention because PoseTrack has no official pycocotools reference.
 
 \section{Conclusion}
 
-We proposed and executed a unified supplementary evaluation protocol for 2D human pose estimation, targeting occlusion, joint angle, and temporal stability, together with an open-source harness and a reproducibility contract. Baseline results on two models and four public datasets show that full OKS-mAP systematically masks occlusion-specific accuracy differences ($\Delta_{\mathrm{occ}}$ up to $-0.41$), that the angle-error protocol captures partially independent information beyond OKS, and that pixel-domain smoothing can reduce temporal jitter at zero accuracy cost. The protocol is positioned as a complement to, not a replacement for, OKS-mAP: it does not change the underlying convention of mainstream rankings, but adds three previously invisible diagnostic dimensions for model selection and system design. The code and all raw predictions are open-sourced.
+We proposed and executed a unified supplementary evaluation protocol for 2D human pose estimation, targeting occlusion, joint angle, and temporal stability, together with an open-source harness and a reproducibility contract. Baseline results on two models and four public datasets show that, in every model--dataset combination tested, full OKS-mAP masks occlusion-specific accuracy differences ($\Delta_{\mathrm{occ}}$ up to $-0.41$), that the angle-error protocol captures partially independent information beyond OKS, and that pixel-domain smoothing can reduce temporal jitter at zero accuracy cost. The protocol is positioned as a complement to, not a replacement for, OKS-mAP: it does not change the underlying convention of mainstream rankings, but adds three previously invisible diagnostic dimensions for model selection and system design. The code and all raw predictions are open-sourced.
+
+% =====================================================================
+% Figures
+% =====================================================================
+
+\begin{figure*}[t]
+\centering
+\begin{minipage}[b]{0.32\linewidth}
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig_m1_coco-val.png}
+\end{minipage}\hfill
+\begin{minipage}[b]{0.32\linewidth}
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig_m1_crowdpose-val.png}
+\end{minipage}\hfill
+\begin{minipage}[b]{0.32\linewidth}
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig_m1_ochuman-test.png}
+\end{minipage}
+\caption{M1 occlusion-stratified mAP$^{50-95}$(P) per dataset: (a) COCO val2017, (b) CrowdPose val, (c) OCHuman test. Bars show full and per-layer mAP for round5-3 and YOLO11s-pose; annotations below each pair give the model difference $\Delta$ with its 95\% bootstrap CI ($*$ $=$ CI excludes 0). The $v{=}0$ layer is shown for completeness and excluded from ranking.}
+\label{fig:m1}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\begin{minipage}[b]{0.32\linewidth}
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig_m2_coco-val.png}
+\end{minipage}\hfill
+\begin{minipage}[b]{0.32\linewidth}
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig_m2_crowdpose-val.png}
+\end{minipage}\hfill
+\begin{minipage}[b]{0.32\linewidth}
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig_m2_ochuman-test.png}
+\end{minipage}
+\caption{M2 joint-angle error distributions ($v{=}2$ layer) per dataset: (a) COCO val2017, (b) CrowdPose val, (c) OCHuman test. Each panel shows per-joint error histograms ($\theta_{\mathrm{pred}}-\theta_{\mathrm{gt}}$) for both models, with RMSE in the legend. Distributions concentrate near $0^{\circ}$; the occlusion-domain datasets separate the two models more clearly (Table~\ref{tab:m2}).}
+\label{fig:m2}
+\end{figure*}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figures/fig_m3_posetrack.png}
+\caption{M3 temporal jitter on an example PoseTrack18 val track (round5-3, longest left-knee segment): (top) per-frame displacement $d_t$ normalized by person-box scale, with the jump threshold $\tau_j=0.10$; (bottom) residual jitter $j_t$ around a causal 5-frame median filter.}
+\label{fig:m3}
+\end{figure}
+
+% =====================================================================
+% Appendix A: bootstrap CIs (generated from summary.json + extra_ci.json)
+% =====================================================================
+
+\appendices
+\renewcommand{\thetable}{A\arabic{table}}
+\setcounter{table}{0}
+\section{Bootstrap Confidence Intervals}
+
+All intervals are 95\% percentile bootstrap CIs from 10,000 resamples with seed 42. The resampling unit is the image for M1 and M2 (the unit over which each metric is aggregated before the model comparison) and the track segment for M3. Paired comparisons share the same resample index across the two quantities; between-model comparisons resample the two models' units independently. Sign convention: $\Delta=$ YOLO11s-pose $-$ round5-3, so $\Delta<0$ favors round5-3 for AP and $\kappa$, and favors YOLO11s-pose for RMSE. $^{*}$ marks intervals that exclude 0. Every entry of the fixed comparison list is tabulated; none is selected.
+
+\input{appendix_tables}
 
 \begin{thebibliography}{15}
 \bibitem{1} T.-Y. Lin \emph{et al.}, ``Microsoft COCO: Common objects in context,'' in \emph{Proc. ECCV}, 2014.
