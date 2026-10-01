@@ -1,6 +1,6 @@
 # Uncovering the Blind Spots of OKS-mAP: A Unified Protocol for Occlusion, Joint-Angle, and Temporal Evaluation of 2D Pose Estimators
 
-> English draft of Paper A (2026-10-01), translated from the Chinese manuscript. Author: Yifan Fan (Independent Researcher).
+> English draft of Paper A (2026-10-01), translated from the Chinese manuscript. Author: Yifan Fan (International Department, Taiyuan Yangfan School).
 > All numbers are locked values from the G3 baseline experiments (summary.json, schema_version=1). The Chinese draft remains the source of truth until author sign-off.
 
 ## Abstract
