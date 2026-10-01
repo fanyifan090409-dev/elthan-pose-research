@@ -44,3 +44,44 @@
 - 读 #1 PoseTrack jitter 公式、#2 OCHuman 分层评测细节、#4 Ghafoor 三协议、#5 Turner 技术评估指标（PDF 均可用 giiisp filestore 或 arXiv 镜像取）；
 - 补充检索一次「unified pose evaluation protocol」变体词确认无统一协议先例；
 - 写作时补 COCO/OneEuro/Janisch（OpenPose CCC=0.95，问卷线已有）引用的题录。
+
+---
+
+# G5 第二轮（2026-10-01）
+
+> G3 基准实验同日收官，G4 PoseTrack 官方表单用户已提交 → G5 第二轮启动。
+> 方法：Giiisp searchArxiv 多字段接口（免鉴权）九组检索词，pageSize=10，全部 code 200；
+> 命中 JSON 存档 Mac `~/isef-data/g5-search/`。状态口径同第一轮。
+
+## 一、九组检索词与结论摘要
+
+| 检索词（简） | 结论 |
+|---|---|
+| occlusion stratified keypoint evaluation visibility mAP | 无 v 分层评估协议先例；命中均为遮挡处理方法/可见性预测，非评估协议 |
+| OKS keypoint similarity limitations evaluation | **无评估侧 OKS 批判论文**；YOLO-Pose 2204.06806 / ER-Pose 2603.08681 是训练侧 OKS loss（动机段落可用） |
+| joint angle error pose estimation validation markerless | 命中健身域近邻 #5（2608.24384，已第一轮收录）+ AthletePose3D、DeepLabCut 步态线 |
+| temporal jitter keypoint tracking stability | 无抖动评估协议先例；命中全是追踪方法（Detect-and-Track、APT 系） |
+| unified pose evaluation protocol occlusion angle temporal | **无三合一统一协议先例**（唯一「UniEval」是 LLM 多模态评估，无关）→ novelty 边界维持 |
+| human pose estimation evaluation protocol benchmark survey | 四篇 survey 均无分层+角度+时序组合协议章节 |
+| OCHuman occlusion benchmark evaluation | 复核 OCHuman 1803.10683；新见 **1808.09316 How Robust is 3D HPE to Occlusion?**（遮挡鲁棒性评测，3D） |
+| CrowdPose crowded benchmark | 复核 CrowdPose 1812.00324；新见 JRDB-Pose 2210.11940（拥挤多模态基准） |
+| keypoint jitter smoothing OneEuro evaluation | 无平滑-抖动评估先例；新见 **2608.03516 Detecting Pose Estimation Failures via Keypoint Self-Consistency**（失败检测邻域） |
+
+## 二、新增候选论文
+
+| # | 论文 | 年份 | arXiv | 与协议的关系 | 状态 |
+|---|---|---|---|---|---|
+| 11 | How Robust is 3D Human Pose Estimation to Occlusion? | 2018 | 1808.09316 | M1 邻域：遮挡鲁棒性评测（3D、合成遮挡） | 待核验 |
+| 12 | Benchmarking Fish Dataset and Evaluation Metric in Keypoint Detection (FishPhenoKey, PMP 指标) | 2024 | 2405.12476 | OKS 盲区叙事佐证：域专用关键点指标先例（鱼形态） | 待核验 |
+| 13 | APTv2: Benchmarking Animal Pose Estimation and Tracking | 2023 | 2312.15612 | M3 邻域：视频追踪基准（追踪指标系，无抖动指标） | 待核验 |
+| 14 | Detecting Pose Estimation Failures via Keypoint Self-Consistency | 2026 | 2608.03516 | M3 邻域：关键点自一致性失败检测（单帧内，非帧间） | 待核验 |
+| 15 | AthletePose3D: A Benchmark Dataset for 3D HPE and Kinematic Validation in Athletic Movements | 2025 | 2503.07499 | M2 邻域：运动员运动学验证（3D） | 待核验 |
+| 16 | VOccl3D: A Video Benchmark for 3D HPE under real Occlusions | 2025 | 2508.06757 | M1 邻域：真实遮挡视频基准（3D） | 待核验 |
+
+## 三、第二轮裁决
+
+1. **统一协议 novelty 边界维持成立**：九组检索无一命中「遮挡分层 + 角度误差 + 时序抖动」三合一评估协议。贡献 1 口径不变（统一跨数据集补充协议 + 开源 harness）。
+2. **M1 声明不变**：分层单点先例仍为 OCHuman 协议（1803.10683）；新增 3D 遮挡鲁棒性评测线（#11/#16）进 Related Work，与 2D 真实 v 标注分层划界。
+3. **M2 声明不变**：#5（2608.24384 阻力训练 BlazePose 角度 RMSE）确认为最近先例——它验证「框架能否恢复动作模式」且单视频、无分层、无代偿检出；我们做「角度作为模型间区分度指标」的跨数据集协议。Related Work 必引。
+4. **M3 声明不变**：抖动稳定性评估无先例；PoseTrack 原文（#1）指标是追踪质量（MOTA 系），与「无追踪逐帧推理的原始输出稳定性」划界成立。#13/#14 列为邻域。
+5. **G5 收敛**：novelty 边界核验关闭。剩余写作前深读清单：#1 jitter 公式、#2 OCHuman 分层细节、#5 评估指标细节（三项 PDF 深读留给 G6 写作期做，不影响 10/11 开工）。
