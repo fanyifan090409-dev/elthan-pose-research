@@ -1,0 +1,10 @@
+#!/bin/bash
+source /home/ubuntu/Miniconda3/etc/profile.d/conda.sh
+conda activate py310
+export HF_ENDPOINT=https://hf-mirror.com
+export HF_HUB_DISABLE_XET=1
+python - <<'PYEOF'
+from huggingface_hub import snapshot_download
+p = snapshot_download(repo_id="Qwen/Qwen2.5-VL-32B-Instruct-AWQ", local_dir="/home/ubuntu/isef/models/qwen2.5-vl-32b-instruct-awq", max_workers=8)
+print("WEIGHTS_DOWNLOAD_DONE", p)
+PYEOF

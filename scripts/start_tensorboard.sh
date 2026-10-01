@@ -1,5 +1,5 @@
 #!/bin/bash
-# ISEF TensorBoard launcher
+# Elthan TensorBoard launcher
 export PATH=/home/ubuntu/Miniconda3/envs/py310/bin:$PATH
 pkill -f "tensorboard --logdir /home/ubuntu/isef/runs" 2>/dev/null
 sleep 1

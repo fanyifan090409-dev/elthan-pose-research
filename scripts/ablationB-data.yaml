@@ -1,0 +1,17 @@
+# pose-round5 消融 B：去 OCHuman（COCO+MPII+CrowdPose+OTP）
+path: /home/ubuntu/isef/datasets/pose-round5
+train:
+  - /home/ubuntu/isef/datasets/pose-round3/images/train
+  - /home/ubuntu/isef/datasets/crowdpose/yolo/images/train
+  - /home/ubuntu/isef/datasets/openthermalpose/yolo/images/train
+val: /home/ubuntu/isef/datasets/pose-round3/images/val
+names:
+  0: person
+  1: sit down
+  2: sit up
+  3: push down
+  4: push up
+  5: weights down
+  6: weights up
+kpt_shape: [17, 3]
+flip_idx: [0, 2, 1, 4, 3, 6, 5, 8, 7, 10, 9, 12, 11, 14, 13, 16, 15]

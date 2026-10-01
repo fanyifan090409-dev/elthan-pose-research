@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""ISEF pose visualization: render skeleton overlays from YOLO26-pose predictions."""
+"""Elthan pose visualization: render skeleton overlays from YOLO26-pose predictions."""
 import sys, os, time
 import numpy as np
 from ultralytics import YOLO

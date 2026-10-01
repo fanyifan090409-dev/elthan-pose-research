@@ -1,0 +1,12 @@
+from PIL import Image, ImageDraw
+im = Image.new("RGB", (720, 960), (245, 245, 247))
+d = ImageDraw.Draw(im)
+d.ellipse([(320, 100), (400, 180)], outline=(30, 30, 30), width=8)
+d.line([(360, 180), (360, 420)], fill=(30, 30, 30), width=10)
+d.line([(360, 240), (260, 380)], fill=(30, 30, 30), width=8)
+d.line([(360, 240), (470, 360)], fill=(30, 30, 30), width=8)
+d.line([(360, 420), (280, 640), (260, 860)], fill=(30, 30, 30), width=10)
+d.line([(360, 420), (450, 620), (480, 850)], fill=(30, 30, 30), width=10)
+d.text((30, 30), "TEST: stick-figure squat", fill=(150, 30, 30))
+im.save("/home/ubuntu/isef/data/test_images/stick_squat.png")
+print("TEST_IMAGE_OK")

@@ -1,5 +1,5 @@
 #!/bin/bash
-# ISEF MLflow server launcher (allows Tailscale + LAN + loopback hosts)
+# Elthan MLflow server launcher (allows Tailscale + LAN + loopback hosts)
 export MLFLOW_SERVER_ALLOWED_HOSTS="localhost:*,127.0.0.1:*,192.168.*.*:*,100.64.*.*:*,100.86.*.*:*,ubuntu-20-1:*,ubuntu-20-1.local:*"
 pkill -f "mlflow server" 2>/dev/null
 sleep 2
