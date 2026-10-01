@@ -14,7 +14,7 @@
 
 二维人体姿态估计是计算机视觉的基础任务之一，其结果被广泛用于动作识别、运动分析与实时健身矫正等下游应用。在这些应用中，评估数字与实际可用性之间的落差比单纯的平均精度更值得关注：一个在基准上排名领先的模型，可能在人体遮挡、快速运动或需要精细关节角度判断的场景中表现明显更差，而这一差异在主流指标中不可见。
 
-当前事实标准评估协议是 COCO keypoints 协议定义的 OKS mAP[1]。它以关键点相似度（OKS）为匹配与计分基础，在整组测试图像上聚合得到一个标量。这一设计存在三个盲区。第一，OKS 聚合不区分关键点可见性：可见、遮挡与不可见（缺失）关键点被等同地计入同一分数，遮挡场景的精度差异被全量平均稀释。第二，协议不度量关节角度：OKS 惩罚的是关键点像素位置误差，而下游应用（如运动矫正）关心的是由关键点推导出的关节角是否准确，两者并非线性对应。第三，协议不反映时序行为：多数系统对视频逐帧独立推理，帧间输出的抖动直接决定下游消费端的观感，而静态图像协议对此完全沉默。已有工作对上述问题各有局部回应——OCHuman 按遮挡级别组织评测[2]，PoseTrack 引入 Jitter 指标度量轨迹平滑度[3]，生物力学领域对 markerless 姿态估计做过关节角度效度验证[4-6]——但尚无一个统一、可复现、跨数据集一致的补充协议，也没有任何基准数字说明这三个盲区在实际模型上的量级。
+当前事实标准评估协议是 COCO keypoints 协议定义的 OKS mAP[1]。它以关键点相似度（OKS）为匹配与计分基础，在整组测试图像上聚合得到一个标量。这一设计存在三个盲区。第一，OKS 聚合不区分关键点可见性：可见、遮挡与不可见（缺失）关键点被等同地计入同一分数，遮挡场景的精度差异被全量平均稀释。第二，协议不度量关节角度：OKS 惩罚的是关键点像素位置误差，而下游应用（如运动矫正）关心的是由关键点推导出的关节角是否准确，两者并非线性对应。第三，协议不反映时序行为：多数系统对视频逐帧独立推理，帧间输出的抖动直接决定下游消费端的观感，而静态图像协议对此完全沉默。已有工作对上述问题各有局部回应——OCHuman 按遮挡级别组织评测[2]，PoseTrack 与 SmoothNet 分别从跟踪指标（MOTA/MOTP）与时序平滑度（逐关节加速度幅值 Accel）延伸了静态协议[3,15]，生物力学领域对 markerless 姿态估计做过关节角度效度验证[4-6]——但尚无一个统一、可复现、跨数据集一致的补充协议，也没有任何基准数字说明这三个盲区在实际模型上的量级。
 
 本文提出一个三模块统一补充评估协议（第 3 节），并开源其执行层 eval harness（单次推理同时产出官方指标与协议指标，含三门禁自检）。我们在四个公开数据集上以两个代表性模型为基准执行了协议（第 4-5 节），回答四个研究问题：
 
@@ -27,11 +27,11 @@
 
 ## 2 相关工作
 
-**姿态估计评估协议。** COCO keypoints 协议以 OKS 为核心，自 2014 年起是该领域的事实标准[1]。PoseTrack 针对视频多人姿态跟踪，在 MOT 指标之外引入 Jitter（轨迹点相对平滑轨迹的平均偏移）评估时序质量[3]【待补：深读原文核对 Jitter 公式，若与本文 M3 的抖动定义可比需在此说明差异】。CrowdPose 与 OCHuman 在数据侧提供了真实标注的可见性/遮挡级别标记（CrowdPose 的 v=1、OCHuman 的三级遮挡）[2,7]。这些工作的共同边界是：各自在单一数据集内做单点改进，没有形成跨数据集统一口径的补充协议。
+**姿态估计评估协议。** COCO keypoints 协议以 OKS 为核心，自 2014 年起是该领域的事实标准[1]。PoseTrack 针对视频多人姿态跟踪，建立了以 MOTA/MOTP 为核心的跟踪评测口径[3]；SmoothNet 进一步提出逐关节加速度幅值（Accel，单位为像素/帧²）作为视频姿态时序平滑度的指标，并在滤波细化前后对比中沿用该口径[15]。本文 M3 与其互补：Accel 度量帧间二阶差分的大小，本文的帧间位移与中值滤波残差分别度量位置波动与高频噪声，且额外报告平滑操作的精度（AP）代价。CrowdPose 与 OCHuman 在数据侧提供了真实标注的可见性/遮挡级别标记（CrowdPose 的 v=1、OCHuman 的三级遮挡）[2,7]。这些工作的共同边界是：各自在单一数据集内做单点改进，没有形成跨数据集统一口径的补充协议。
 
 **遮挡鲁棒性评估。** 遮挡对姿态估计的影响已有量化尝试：Ghafoor 与 Mahmood 通过合成缺失关节构造三组实验量化遮挡对 3D 姿态误差的影响[8]；后续工作在合成遮挡下的鲁棒性评测[9]与可见性感知的视频遮挡基准[10]上延续了这一思路。与本文的差异在于：这些工作使用合成遮挡或非真实标注分层，且集中于单数据集、单指标；本文直接利用三个数据集的真实 v 标注做跨数据集分层，并与全量 mAP 对照给出 Δ_occ。
 
-**关节角度验证。** 生物力学与运动科学领域已有 markerless 姿态估计的角度效度研究线：Turner 等人在阻力训练场景评估姿态估计算法的技术指标[4]，Panconi 等验证 DeepLabCut 在步态分析中的关节角[5]，Pemasiri 等构建面向生物力学解释的步态分析框架[6]。这些研究回答的问题是「估测角度是否等于临床/标记点金标准」（效度），依赖专门的标记点或专家标注；本文不重复效度验证，而是把 GT 推导角度用作模型间比较的协议指标——它与效度研究互补而非竞争（第 6 节详述这一边界）。膝内扣阈值取文献报道的膝外翻 FPPA 量级（约 16–17°）作为参照[11]【待补：复核原文口径与 2D 图像代理的可比性】。
+**关节角度验证。** 生物力学与运动科学领域已有 markerless 姿态估计的角度效度研究线：Turner 等在 89 段阻力训练视频上以 BlazePose 关键点重建关节角轨迹，并与参考动作逐帧计算 RMSE 评估动作技术质量[4]；Panconi 等验证 DeepLabCut 在步态分析中的关节角[5]；Pemasiri 等构建面向生物力学解释的步态分析框架[6]。这些研究回答的问题是「估测角度是否等于临床/标记点金标准」（效度），依赖专门的标记点或专家标注；本文不重复效度验证，而是把 GT 推导角度用作模型间比较的协议指标——它与效度研究互补而非竞争（第 6 节详述这一边界）。膝内扣阈值取文献报道的膝外翻额状面投影角（FPPA）量级——侧向下台阶测试 16.0–17.4°——作为参照[11]。
 
 **时序一致性与平滑。** 逐帧独立推理的时序不一致问题由 Deep Video Prior 等从通用角度讨论[12]；工程上广泛采用 OneEuro 因果滤波平滑关键点轨迹[13]。本文把「无追踪原始输出的稳定性」本身作为协议指标，并系统对比了两种滤波域（归一化坐标域与像素域）对抖动指标与 AP 的联合影响——这一对比揭示了滤波域选择如何决定平滑的收益与代价。
 
@@ -75,7 +75,7 @@
 
 **有效性掩码。** GT 角度：三点 GT v 均 >0 才计入；预测角度：同三点 GT v 均 >0 且预测置信度 >0 才计入——保证 GT 与预测同域可比，不引入预测缺失的偏差。逐实例误差 e = θ_pred − θ_gt，报告 RMSE、MAE、P95；按顶点 GT 可见性分 v=2/v=1 两档报告，与 M1 联动。
 
-**代偿检出一致性。** 膝内扣角 φ 定义为髋→膝向量与髋→踝向量在图像平面的夹角（膝点偏离髋踝轴线的程度），仅对三点 v 均 >0 的实例计算。以阈值 τ 对 φ_pred 与 φ_GT 分别二值化（默认 τ=15°，敏感性分析 τ∈{10°, 17°}），报告以 GT 为金标准的检出灵敏度、特异度与 Cohen's κ。两点说明：不报告绝对检出率（静态数据集视角混杂，绝对率无意义，一致性才是协议能测的量）；φ 是 2D 图像代理，不等同于临床 FPPA，τ 取值仅取文献量级参照[11]。
+**代偿检出一致性。** 膝内扣角 φ 定义为髋→膝向量与髋→踝向量在图像平面的夹角（膝点偏离髋踝轴线的程度），仅对三点 v 均 >0 的实例计算。以阈值 τ 对 φ_pred 与 φ_GT 分别二值化（默认 τ=15°，敏感性分析 τ∈{10°, 17°}），报告以 GT 为金标准的检出灵敏度、特异度与 Cohen's κ。两点说明：不报告绝对检出率（静态数据集视角混杂，绝对率无意义，一致性才是协议能测的量）；φ 是任意视角下的 2D 图像代理，而 FPPA 文献值来自标准化正面机位[11]，本文数据集视角混杂，τ 取值仅取文献量级参照，不作临床诊断含义。
 
 ### 3.3 M3：时序抖动
 
@@ -205,26 +205,27 @@ PoseTrack18 val 上两模型各得到 704 / 728 条轨迹段（161 / 160 个视�
 
 [1] Lin, T.-Y., et al. Microsoft COCO: Common Objects in Context. ECCV 2014.
 [2] Zhang, S.-H., et al. Pose2Seg: Detection Free Human Instance Segmentation (OCHuman). arXiv:1803.10683, 2018.
-[3] Andriluka, M., et al. PoseTrack: A Benchmark for Human Pose Estimation and Tracking. arXiv:1710.10000, 2017. 【待补：深读 Jitter 公式】
-[4] Turner, et al. Markerless Pose Estimation for Resistance Training Technique Assessment. arXiv:2608.24384, 2026. 【待补：深读评估指标】
+[3] Andriluka, M., et al. PoseTrack: A Benchmark for Human Pose Estimation and Tracking. CVPR 2018; arXiv:1712.09184, 2017.
+[4] Turner, J., Clark, J., Keshtmand, N. Markerless Pose Estimation for Resistance Training Technique Assessment. arXiv:2608.24384, 2026.
 [5] Panconi, et al. Deep-Learning-Based Markerless Pose Estimation Systems in Gait Analysis. arXiv:2407.10590, 2024.
 [6] Pemasiri, et al. Biomechanically Accurate Gait Analysis. arXiv:2603.02499, 2026.
 [7] Li, J., et al. CrowdPose: Efficient Crowded Scenes Pose Estimation and a New Benchmark. arXiv:1812.00324, 2018.
 [8] Ghafoor, A., Mahmood, A. Quantification of Occlusion Handling Capability of a 3D Human Pose Estimation Framework. IEEE TMM, arXiv:2203.04113, 2022.
-[9] （遮挡鲁棒性评测）arXiv:1808.09316. 【待补：补全题录】
-[10] （VOccl3D）arXiv:2508.06757. 【待补：补全题录】
-[11] Mendonça, et al. （膝外翻 FPPA 文献）.【待补：原文复核 + 题录】
+[9] Sárándi, I., Linder, T., Arras, K.O., Leibe, B. How Robust is 3D Human Pose Estimation to Occlusion? IROS 2018 Workshop on Robotic Co-workers 4.0. arXiv:1808.09316, 2018.
+[10] Garg, Y., Bachu, S., Dutta, A., Lal, R., Bose, S., Ta, C.-K., Asif, M.S., Roy-Chowdhury, A. VOccl3D: A Video Benchmark Dataset for 3D Human Pose and Shape Estimation under Real Occlusions. arXiv:2508.06757, 2025.
+[11] Mendonça, I.L.A., do Nascimento Filho, F.M., Badicu, G., de Vasconcelos, D.P., Lima, T.B., Calmon, V., de Farias Neto, J.P., Jakubiak, G.K., Maciel, L.Y.S., Aidar, F.J., Monteiro da Silva Júnior, W. Analysis of Ankle Mobility and Dynamic Valgus Knee in Runners With and Without Patellofemoral Pain Syndrome. Health Science Reports, 9, e72051, 2026.
 [12] Lei, C., et al. Deep Video Prior for Video Consistency and Propagation. IEEE TPAMI, arXiv:2201.11632, 2022.
 [13] Casiez, G., Roussel, N., Vogel, D. 1€ Filter: A Simple Speed-based Low-pass Filter for Noisy Input in Interactive Systems. CHI 2012.
 [14] Jocher, G., et al. Ultralytics YOLO11. https://github.com/ultralytics/ultralytics, 2024.
+[15] Zeng, A., Yang, L., Ju, X., Li, J., Wang, J., Xu, Q. SmoothNet: A Plug-and-Play Network for Refining Human Pose Estimation in Videos. ECCV 2022; arXiv:2112.13715, 2022.
 
 ---
 
 ## 附：写作状态与待办
 
 - 图：G3 已生成 7 张图（fig_m1×3 分层 mAP 柱状、fig_m2×3 角度误差分布、fig_m3_posetrack 抖动时序），正文成稿后按表 3/4/6 编号引用。
-- 【待补 1】参考文献 [3] PoseTrack Jitter 公式深读（决定 M3 抖动定义与其差异的写法）。
-- 【待补 2】参考文献 [4] Turner 评估指标深读（Related Work 划界引用）。
-- 【待补 3】参考文献 [11] Mendonça FPPA 原文复核（2D 代理可比性声明）。
-- 【待补 4】参考文献 [9][10] 题录补全（G5 第二轮命中，元数据在 ~/isef-data/g5-search/）。
+- 【已核销 1】参考文献 [3]：深读 PoseTrack 两版全文（1710.10000 / 1712.09184），**均无 Jitter 指标**（仅 PCKh + MOTA/MOTP）。原「PoseTrack 引入 Jitter」说法已改：时序平滑度指标线归为 SmoothNet 的 Accel[15]（逐关节加速度幅值，像素/帧²），M3 与 Accel 的互补关系已在相关工作写明。
+- 【已核销 2】参考文献 [4]：Turner 指标已深读——BlazePose 关键点 → 关节角轨迹 → 与参考动作逐帧 RMSE（89 视频，相似度 S=max(0,100−2·RMSE)，深蹲 RMSE 17.56°）。相关工作已按此精确表述。
+- 【已核销 3】参考文献 [11]：Mendonça 原文已复核（Health Sci Rep 9:e72051, 2026；40 名女性跑者，侧向下台阶测试，FPPA 16.01–17.35°，组间/肢间差异均不显著，仅作量级参照）。2D 代理可比性声明已写入 3.2 节（FPPA 为标准化正面机位，本文视角混杂）。
+- 【已核销 4】参考文献 [9][10] 题录已补全（Sárándi IROS'18 WS；Garg VOccl3D 2508.06757）。
 - 英文版在中文稿定稿后翻译（nature-writing zh-to-en 片段流程）。
