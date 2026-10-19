@@ -1,0 +1,335 @@
+{
+  "F1_M1_full_AP": {
+    "rows": {
+      "M1 coco-val": {
+        "point_delta": -0.010353,
+        "ci_lo": -0.015471,
+        "ci_hi": -0.005894,
+        "p": 0.0,
+        "sig": true,
+        "p_adj": 0.0,
+        "sig_adj": true
+      },
+      "M1 crowdpose-val": {
+        "point_delta": 0.06871,
+        "ci_lo": 0.061559,
+        "ci_hi": 0.075388,
+        "p": 0.0,
+        "sig": true,
+        "p_adj": 0.0,
+        "sig_adj": true
+      },
+      "M1 ochuman-test": {
+        "point_delta": 0.139565,
+        "ci_lo": 0.128106,
+        "ci_hi": 0.15079,
+        "p": 0.0,
+        "sig": true,
+        "p_adj": 0.0,
+        "sig_adj": true
+      }
+    },
+    "n": 3,
+    "n_sig_raw": 3,
+    "n_sig_bh": 3
+  },
+  "F2_M2_rmse_cells": {
+    "rows": {
+      "M2 coco-val left_elbow v2": {
+        "point_delta": 0.6782,
+        "ci_lo": -1.7287,
+        "ci_hi": 3.0396,
+        "p": 0.5828,
+        "sig": false,
+        "p_adj": 0.8322,
+        "sig_adj": false
+      },
+      "M2 coco-val left_elbow v1": {
+        "point_delta": -3.0933,
+        "ci_lo": -11.0757,
+        "ci_hi": 4.7844,
+        "p": 0.444,
+        "sig": false,
+        "p_adj": 0.761143,
+        "sig_adj": false
+      },
+      "M2 coco-val right_elbow v2": {
+        "point_delta": 0.4619,
+        "ci_lo": -1.8765,
+        "ci_hi": 2.7743,
+        "p": 0.7022,
+        "sig": false,
+        "p_adj": 0.8322,
+        "sig_adj": false
+      },
+      "M2 coco-val right_elbow v1": {
+        "point_delta": 2.8784,
+        "ci_lo": -3.4155,
+        "ci_hi": 9.1133,
+        "p": 0.3736,
+        "sig": false,
+        "p_adj": 0.689723,
+        "sig_adj": false
+      },
+      "M2 coco-val left_knee v2": {
+        "point_delta": -0.5693,
+        "ci_lo": -3.1142,
+        "ci_hi": 1.9829,
+        "p": 0.6554,
+        "sig": false,
+        "p_adj": 0.8322,
+        "sig_adj": false
+      },
+      "M2 coco-val left_knee v1": {
+        "point_delta": -1.3997,
+        "ci_lo": -11.5768,
+        "ci_hi": 8.8087,
+        "p": 0.7992,
+        "sig": false,
+        "p_adj": 0.871855,
+        "sig_adj": false
+      },
+      "M2 coco-val right_knee v2": {
+        "point_delta": -0.7424,
+        "ci_lo": -3.1356,
+        "ci_hi": 1.6546,
+        "p": 0.5548,
+        "sig": false,
+        "p_adj": 0.8322,
+        "sig_adj": false
+      },
+      "M2 coco-val right_knee v1": {
+        "point_delta": -2.6246,
+        "ci_lo": -12.1749,
+        "ci_hi": 6.9116,
+        "p": 0.6016,
+        "sig": false,
+        "p_adj": 0.8322,
+        "sig_adj": false
+      },
+      "M2 crowdpose-val left_elbow v2": {
+        "point_delta": 0.2177,
+        "ci_lo": -2.5063,
+        "ci_hi": 2.9847,
+        "p": 0.8768,
+        "sig": false,
+        "p_adj": 0.914922,
+        "sig_adj": false
+      },
+      "M2 crowdpose-val left_elbow v1": {
+        "point_delta": -3.7355,
+        "ci_lo": -6.0494,
+        "ci_hi": -1.4487,
+        "p": 0.0016,
+        "sig": true,
+        "p_adj": 0.005486,
+        "sig_adj": true
+      },
+      "M2 crowdpose-val right_elbow v2": {
+        "point_delta": -0.5567,
+        "ci_lo": -3.1789,
+        "ci_hi": 2.0759,
+        "p": 0.6718,
+        "sig": false,
+        "p_adj": 0.8322,
+        "sig_adj": false
+      },
+      "M2 crowdpose-val right_elbow v1": {
+        "point_delta": -3.0991,
+        "ci_lo": -5.4989,
+        "ci_hi": -0.7193,
+        "p": 0.0086,
+        "sig": true,
+        "p_adj": 0.018764,
+        "sig_adj": true
+      },
+      "M2 crowdpose-val left_knee v2": {
+        "point_delta": -0.2008,
+        "ci_lo": -3.6422,
+        "ci_hi": 3.3487,
+        "p": 0.9206,
+        "sig": false,
+        "p_adj": 0.9206,
+        "sig_adj": false
+      },
+      "M2 crowdpose-val left_knee v1": {
+        "point_delta": -4.8695,
+        "ci_lo": -7.671,
+        "ci_hi": -2.0897,
+        "p": 0.0002,
+        "sig": true,
+        "p_adj": 0.0016,
+        "sig_adj": true
+      },
+      "M2 crowdpose-val right_knee v2": {
+        "point_delta": -1.1955,
+        "ci_lo": -4.3292,
+        "ci_hi": 2.0215,
+        "p": 0.463,
+        "sig": false,
+        "p_adj": 0.761143,
+        "sig_adj": false
+      },
+      "M2 crowdpose-val right_knee v1": {
+        "point_delta": -4.3532,
+        "ci_lo": -7.2435,
+        "ci_hi": -1.4274,
+        "p": 0.003,
+        "sig": true,
+        "p_adj": 0.008,
+        "sig_adj": true
+      },
+      "M2 ochuman-test left_elbow v2": {
+        "point_delta": -4.1708,
+        "ci_lo": -6.5563,
+        "ci_hi": -1.736,
+        "p": 0.0008,
+        "sig": true,
+        "p_adj": 0.00384,
+        "sig_adj": true
+      },
+      "M2 ochuman-test left_elbow v1": {
+        "point_delta": -10.8007,
+        "ci_lo": -14.5977,
+        "ci_hi": -6.8819,
+        "p": 0.0,
+        "sig": true,
+        "p_adj": 0.0,
+        "sig_adj": true
+      },
+      "M2 ochuman-test right_elbow v2": {
+        "point_delta": -3.9219,
+        "ci_lo": -6.428,
+        "ci_hi": -1.4694,
+        "p": 0.0016,
+        "sig": true,
+        "p_adj": 0.005486,
+        "sig_adj": true
+      },
+      "M2 ochuman-test right_elbow v1": {
+        "point_delta": -13.2385,
+        "ci_lo": -17.1184,
+        "ci_hi": -9.2323,
+        "p": 0.0,
+        "sig": true,
+        "p_adj": 0.0,
+        "sig_adj": true
+      },
+      "M2 ochuman-test left_knee v2": {
+        "point_delta": -3.6435,
+        "ci_lo": -6.1476,
+        "ci_hi": -1.1277,
+        "p": 0.0058,
+        "sig": true,
+        "p_adj": 0.01392,
+        "sig_adj": true
+      },
+      "M2 ochuman-test left_knee v1": {
+        "point_delta": -8.7966,
+        "ci_lo": -13.8743,
+        "ci_hi": -3.5585,
+        "p": 0.0008,
+        "sig": true,
+        "p_adj": 0.00384,
+        "sig_adj": true
+      },
+      "M2 ochuman-test right_knee v2": {
+        "point_delta": -4.3093,
+        "ci_lo": -6.8603,
+        "ci_hi": -1.7329,
+        "p": 0.0004,
+        "sig": true,
+        "p_adj": 0.0024,
+        "sig_adj": true
+      },
+      "M2 ochuman-test right_knee v1": {
+        "point_delta": -6.6124,
+        "ci_lo": -12.3613,
+        "ci_hi": -0.7771,
+        "p": 0.0264,
+        "sig": true,
+        "p_adj": 0.0528,
+        "sig_adj": false
+      }
+    },
+    "n": 24,
+    "n_sig_raw": 12,
+    "n_sig_bh": 11
+  },
+  "F3_M3_temporal": {
+    "rows": {
+      "M3 posetrack-val disp_mean": {
+        "point_delta": -0.002159,
+        "ci_lo": -0.006219,
+        "ci_hi": 0.00183,
+        "p": 0.3004,
+        "sig": false,
+        "p_adj": 1.0,
+        "sig_adj": false
+      },
+      "M3 posetrack-val jitter_mean": {
+        "point_delta": -0.001395,
+        "ci_lo": -0.00752,
+        "ci_hi": 0.004671,
+        "p": 0.651,
+        "sig": false,
+        "p_adj": 1.0,
+        "sig_adj": false
+      },
+      "M3 posetrack-val disp_p95": {
+        "point_delta": -0.005106,
+        "ci_lo": -0.018183,
+        "ci_hi": 0.007829,
+        "p": 0.4478,
+        "sig": false,
+        "p_adj": 1.0,
+        "sig_adj": false
+      },
+      "M3 posetrack-val jitter_p95": {
+        "point_delta": -0.005022,
+        "ci_lo": -0.027328,
+        "ci_hi": 0.017789,
+        "p": 0.6816,
+        "sig": false,
+        "p_adj": 1.0,
+        "sig_adj": false
+      },
+      "M3 posetrack-val jump_0.05": {
+        "point_delta": -0.009136,
+        "ci_lo": -0.032641,
+        "ci_hi": 0.014682,
+        "p": 0.449,
+        "sig": false,
+        "p_adj": 1.0,
+        "sig_adj": false
+      },
+      "M3 posetrack-val jump_0.1": {
+        "point_delta": -0.005148,
+        "ci_lo": -0.018829,
+        "ci_hi": 0.008525,
+        "p": 0.4688,
+        "sig": false,
+        "p_adj": 1.0,
+        "sig_adj": false
+      },
+      "M3 posetrack-val jump_0.2": {
+        "point_delta": -0.003193,
+        "ci_lo": -0.007834,
+        "ci_hi": 0.00151,
+        "p": 0.1828,
+        "sig": false,
+        "p_adj": 1.0,
+        "sig_adj": false
+      }
+    },
+    "n": 7,
+    "n_sig_raw": 0,
+    "n_sig_bh": 0
+  },
+  "_protocol": {
+    "comparisons": "round5-3 vs yolo11s-pose, detection-based protocol",
+    "p": "two-sided bootstrap p = 2*min(P(d<=0), P(d>=0)), 10000 resamples, seed 42",
+    "bh": "Benjamini-Hochberg within family, alpha=0.05",
+    "scope": "core comparison families of the main protocol (F1: full AP per dataset; F2: per-cell RMSE; F3: temporal metrics)"
+  }
+}
