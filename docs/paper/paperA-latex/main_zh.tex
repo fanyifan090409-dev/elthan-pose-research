@@ -40,7 +40,7 @@
 \maketitle
 
 \begin{abstract}
-二维人体姿态估计的主流评估协议——基于对象关键点相似度（OKS）的 mAP——对三个对下游应用至关重要的性质不敏感：聚合分数不区分可见与遮挡关键点；不度量关节角度误差；对无追踪逐帧推理输出的时序稳定性保持沉默。本文提出一个统一的补充评估协议，包含三个模块：（M1）按真实可见性标注（$v$）分层的 OKS-mAP，并以 $\Delta_{\mathrm{occ}}=\mathrm{mAP}(v{=}1)-\mathrm{mAP}(\mathrm{full})$ 量化聚合指标对遮挡特定差异的掩盖程度；（M2）以真实标注（GT）关键点推导的关节角为参照的角度误差（RMSE/MAE/P95）与膝内扣检出一致性（Cohen's $\kappa$）；（M3）无追踪逐帧推理设定下的帧间位移、中值滤波残差抖动与跳变率，以及 OneEuro 平滑前后的对比。我们在四个公开数据集（COCO val2017、CrowdPose、OCHuman、PoseTrack18）上对跨越两个架构族的四个模型——官方 YOLO11s-pose 与一个遮挡域数据微调模型，以及基于 Transformer 的 ViTPose-B/L——执行了协议，全部跨架构比较均在统一的检测器无关 GT-bbox oracle 协议下进行，全部指标由开源 harness 单次推理统一产出。所有模型-数据集组合的 $\Delta_{\mathrm{occ}}$ 均为负（$-0.19$ 至 $-0.47$）：聚合 mAP 在每一个受测组合、两个架构族中都高估了遮挡场景的表现。角度误差在所有受测组合的遮挡层均被放大；在遮挡域数据集上，角度指标揭示了模型之间的显著差异，而聚合 mAP 无法定位这一差异——其中包括统一 oracle 协议下的一例：较小的遮挡域训练模型在遮挡肘部层显著比更大的 Transformer 更准。两种协议下两个 YOLO 模型的原始时序抖动均未发现差异；像素域 OneEuro 平滑以零精度代价（$|\Delta\mathrm{AP}|\le 0.0002$）将跳变率降低 9--10\%；oracle 协议进一步证明残余高频抖动来自姿态头本身，且统一协议下 Transformer 模型对的跳变率显著低于 YOLO 模型对，平滑域结论跨架构复现。相关性分析表明分层 mAP 与全量 mAP 高度一致（符号一致性 $\tau_s=1.0$，12/12 对）——其价值在于量级诊断而非重排名——而角度指标（尤其膝角）携带部分独立信息（$\rho=0.72$，$p=0.109$，$n=6$，探索性）。协议与 harness 已开源，定位为 OKS-mAP 的补充而非替代。
+二维人体姿态估计的主流评估协议——基于对象关键点相似度（OKS）的 mAP——对三个对下游应用至关重要的性质不敏感：聚合分数不区分可见与遮挡关键点；不度量关节角度误差；对无追踪逐帧推理输出的时序稳定性保持沉默。本文提出一个统一的补充评估协议，包含三个模块：（M1）按真实可见性标注（$v$）分层的 OKS-mAP，并以 $\Delta_{\mathrm{occ}}=\mathrm{mAP}(v{=}1)-\mathrm{mAP}(\mathrm{full})$ 量化聚合指标对遮挡特定差异的掩盖程度；（M2）以真实标注（GT）关键点推导的关节角为参照的角度误差（RMSE/MAE/P95）与膝内扣检出一致性（Cohen's $\kappa$）；（M3）无追踪逐帧推理设定下的帧间位移、中值滤波残差抖动与跳变率，以及 OneEuro 平滑前后的对比。我们在四个公开数据集（COCO val2017、CrowdPose、OCHuman、PoseTrack18）上对跨越两个架构族的四个模型——官方 YOLO11s-pose 与一个遮挡域数据微调模型，以及基于 Transformer 的 ViTPose-B/L——执行了协议，全部跨架构比较均在统一的检测器无关 GT-bbox oracle 协议下进行，全部指标由开源 harness 单次推理统一产出。所有模型-数据集组合的 $\Delta_{\mathrm{occ}}$ 均为负（$-0.19$ 至 $-0.47$）：聚合 mAP 在每一个受测组合、两个架构族中都高估了遮挡场景的表现。角度误差在所有受测组合的遮挡层均被放大；在遮挡域数据集上，角度指标揭示了模型之间的显著差异，而聚合 mAP 无法定位这一差异——其中包括统一 oracle 协议下的一例：较小的遮挡域训练模型在遮挡肘部层显著比更大的 Transformer 更准。在 PoseTrack18 val 的已匹配保留段子总体上（约 53\% 标注帧），两种协议下两个 YOLO 模型对的原始时序抖动均未发现差异；像素域 OneEuro 平滑以零匹配口径 AP 代价（$|\Delta\mathrm{AP}|\le 0.0002$）将两模型的跳变率降低 9--10\%；oracle 协议进一步证明残余高频抖动在移除检测器后依然存在（并非检测器内生），且统一协议下 Transformer 模型对的跳变率显著低于 YOLO 模型对，平滑域结论跨架构复现。相关性分析表明分层 mAP 与全量 mAP 高度一致（符号一致性 $\tau_s=1.0$，12/12 对）——其价值在于量级诊断而非重排名——而角度指标（尤其膝角）的差值向量与全量 mAP 的排序并不完全一致，提示其携带部分独立信息（描述性 $n=6$，第~5.4 节）。协议与 harness 已开源，定位为 OKS-mAP 的补充而非替代。
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -103,9 +103,9 @@ M3 时序抖动 & 帧间位移 / 抖动 / 跳变率，OneEuro 前后 & PoseTrack
 
 \textbf{分层口径。} 每个 GT 关键点按其可见性标签 $v$ 归层：$v{=}2$ 可见、$v{=}1$ 遮挡、$v{=}0$ 缺失。层内独立计算 OKS AP。$v{=}0$ 层只报告、不参与排名（该层关键点无法被估计，分数接近零；保留该层作为协议完整性的证据）。每个数据集在转换到 COCO17 后保留真实 $v$ 标注：CrowdPose 官方 14 点映射为 COCO 索引 5--16（head\_top 与 neck 两点丢弃——属映射裁剪而非可见性标签破坏，12 个映射点的 $v{=}1$ 标签完整保留）；OCHuman 官方 test 标注本身即 COCO17 格式，直通保留；COCO val 本身含 $v{=}1$ 标注（占关键点 7.75\%）。
 
-\textbf{计算口径。} 沿用 pycocotools 2.0.11 的 keypoints 协议（官方发布数背后的口径）：OKS 阈值 0.50:0.95 共 10 档取均值；num\_keypoints$=$0 的 GT 标为 ignore；maxDets$=$20。分层只改变统计、不改变匹配逻辑：人员匹配（TP/FP 判定）仍按全关键点 OKS 进行，层 AP 只累计该层 GT 关键点的 OKS 贡献。三门禁保证实现正确（与官方库对拍差 $\le0.0001$；合成自检；分层开关不改变全量 mAP）。
+\textbf{计算口径。} 沿用 pycocotools 2.0.11 的 keypoints 协议（官方发布数背后的口径）：OKS 阈值 0.50:0.95 共 10 档取均值；num\_keypoints$=$0 的 GT 标为 ignore；maxDets$=$20。分层只改变统计、不改变匹配逻辑：人员匹配（TP/FP 判定）仍按全关键点 OKS 进行，层 AP 只累计该层 GT 关键点的 OKS 贡献。三门禁保证实现正确：门禁 1 与官方 pycocotools 2.0.11 对拍（差 $\le0.0001$）；门禁 2 合成自检（（i）GT 推导角直通预测路径，RMSE $<10^{-9}$；（ii）二值化膝内扣序列与 GT 完全一致时灵敏度$=$特异度$=1$；（iii）常数轨迹的位移与抖动恒为 0；（iv）常数序列经 OneEuro 后保持不变）；门禁 3 全 $v{=}2$ 合成数据下 $v{=}2$ 层 AP 恒等于全量 AP、分层开关不改变全量 mAP。
 
-\textbf{解释性证据。} 层 AP 的召回分母为全部 GT 人员，因此没有该层关键点的人员永远无法为该层贡献 TP。故每层同时报告「该层 GT 关键点占比」（gt\_frac）与「拥有该层关键点的 GT 人员占比」（gt\_person\_frac）。特别地，CrowdPose 的 v2 层受 14$\rightarrow$17 映射裁剪影响（gt\_person\_frac 仅 0.591），其 v2 层 AP 被系统性低估——CrowdPose 上 v2 与 v1 的跨层比较应使用 $\Delta_{\mathrm{occ}}$（该指标不受此伪影影响）。
+\textbf{解释性证据。} 层 AP 的召回分母为全部 GT 人员，因此没有该层关键点的人员永远无法为该层贡献 TP。故每层同时报告「该层 GT 关键点占比」（gt\_frac）与「拥有该层关键点的 GT 人员占比」（gt\_person\_frac）。特别地，CrowdPose 官方标注把可见点几乎全部标为 $v{=}2$（遮挡点聚集于 $v{=}1$），而层 AP 的召回分母为全部 GT 人员——没有该层关键点的人员永远无法为该层贡献 TP（gt\_person\_frac 仅 0.591），其 v2 层 AP 被系统性低估。这一分母偏置同时作用于 v2 层与全量 AP，在差值 $\Delta_{\mathrm{occ}}=\mathrm{mAP}(v{=}1)-\mathrm{mAP}(\mathrm{full})$ 中相互抵消——这正是 CrowdPose 上跨层比较改用 $\Delta_{\mathrm{occ}}$ 的原因。
 
 \textbf{主指标。} $\Delta_{\mathrm{occ}}=\mathrm{mAP}(v{=}1\ \mathrm{层})-\mathrm{mAP}(\mathrm{全量})$；为负表示全量指标高估遮挡场景表现。两项均在相同的图像域、相同的全量 GT 人员集上计算（$v{=}1$ 层的召回分母即全量 GT 人员集，见解释性证据），因此 $\Delta_{\mathrm{occ}}$ 隔离的是遮挡层的贡献缺口，而非分母变化。逐层 mAP 与 gt\_frac 一并报告。
 
@@ -145,7 +145,7 @@ M3 时序抖动 & 帧间位移 / 抖动 / 跳变率，OneEuro 前后 & PoseTrack
 \begin{enumerate}
 \item 帧间位移 $d_t=\lVert\mathbf{p}_t-\mathbf{p}_{t-1}\rVert_2/s_t$：报告均值与 P95；
 \item 抖动 $j_t=\lVert\mathbf{p}_t-\hat{\mathbf{s}}_t\rVert_2/s_t$，$\hat{\mathbf{s}}$ 为因果 5 帧中值滤波后的轨迹：专测高频噪声（核心指标）；
-\item 跳变率：$d_t>\tau_j$ 的帧占比，默认 $\tau_j=0.10$（人框尺度的 10\%），敏感性 $\tau_j\in\{0.05,0.20\}$。
+\item 跳变率：$d_t>\tau_j$ 的帧占比，默认 $\tau_j=0.05$（人框尺度的 5\%），敏感性 $\tau_j\in\{0.10,0.20\}$。
 \end{enumerate}
 
 \textbf{OneEuro 前后对比。} 离线对 $\mathbf{p}_t$ 施加因果 OneEuro 滤波，参数固定为 Casiez 默认值（min\_cutoff$=1.0$、beta$=0.007$、d\_cutoff$=1.0$）~\cite{13}。平滑后重算三指标与匹配口径 AP，报告精度代价。滤波域双口径：归一化坐标域（q 域，协议原设计）与像素域。实证发现（两模型一致）：q 域滤波在反归一化时把 GT 人框的逐帧尺度噪声（$|s_t/s_{t-1}-1|$，中位数 0.97\%，P95 8.1\%）重新注入像素域，导致抖动指标不降反升、AP 微降；像素域直接滤波零 AP 代价且三指标全面下降。默认参数下的结论对调参不敏感：在 12 点网格（min\_cutoff $\in\{0.5,1,2,4\}\times$ beta $\in\{0.001,0.007,0.05\}$）上，每一个像素域设置都使两模型的全部七个 M3 指标降至原始基线以下，且 $|\Delta\mathrm{AP}|\le 0.0004$；q 域在最强平滑下最多损失 0.0071 AP（网格数字见仓库）。\textbf{本文采用像素域为主口径}，q 域作为敏感性口径如实报告（表~\ref{tab:m3} 双列）。
@@ -155,22 +155,22 @@ M3 时序抖动 & 帧间位移 / 抖动 / 跳变率，OneEuro 前后 & PoseTrack
 \begin{itemize}
 \item 模型比较：M1/M2 图像级、M3 轨迹段级重采样，10,000 次 bootstrap（seed 42）；报告差值 $\Delta$ 的 95\% 百分位 CI，以 CI 是否包含 0 判断显著性。M1 为配对设计（共享图像域 $=$ 两模型 GT 图与预测图的并集）；M2/M3 的有效单元集随匹配结果不同，采用独立重采样，协议中已注明。
 \item 比较清单在实验前固定（2 模型 $\times$ 3 数据集 $\times$ 层/关节/指标，另加 RQ5 的 oracle 清单 2 个 Transformer 模型 $\times$ 3 数据集 $\times$ 层/关节）；每项均报告 CI，不挑选有利结果。
-\item RQ4（协议精简）：在（数据集 $\times$ 层）单元上，计算协议指标差与全量 mAP 差的符号一致性 $\tau_s$，并计算两组差值向量之间的 Spearman $\rho$。$\tau_s$ 统计全部两两单元比较中的同号对，排除全量 mAP 差相同的单元对（并列，符号一致性无定义）：$n=6$（3 数据集 $\times$ 2 层）时，15 个两两比较减去 3 个同数据集层对 $=$ 12 个报告对；关节级（$n=24$：3 数据集 $\times$ 4 关节 $\times$ 2 层）时，276 个两两比较减去 84 个同数据集同关节层对（$3\times28$）$=$ 192 个报告对。两项分析均为探索性，样本量已在正文注明。$n=6$ 个单元仅包含每个指标 3 个独立的数据集级取值（两模型共享同一批三个数据集），因此有效单元是数据集，相关分析属探索性而非验证性。
+\item RQ4（协议精简）：在（数据集 $\times$ 层）单元上，计算协议指标差与全量 mAP 差的符号一致性 $\tau_s=(C-D)/(C+D)$（$C$ 同号对、$D$ 异号对），并计算两组差值向量之间的 Spearman $\rho$。$\tau_s$ 统计全部两两单元比较，排除全量 mAP 差相同的单元对（并列，符号一致性无定义）：$n=6$（3 数据集 $\times$ 2 层）时，15 个两两比较减去 3 个同数据集层对 $=$ 12 个报告对；关节级（$n=24$：3 数据集 $\times$ 4 关节 $\times$ 2 层）时，276 个两两比较减去 84 个同数据集同关节层对（$3\times28$）$=$ 192 个报告对。两项分析均为探索性，样本量已在正文注明。$n=6$ 个单元仅包含每个指标 3 个独立的数据集级取值（两模型共享同一批三个数据集），因此有效单元是数据集，相关分析属探索性而非验证性。所有区间均为逐比较、未做多重校正的 95\% CI；显著性仅作辅助，核心结论以三数据集方向一致性与效应量支撑（核心比较族的 FDR 敏感性分析见附录~A 表~A14）。
 \end{itemize}
 
 \subsection{Harness 与可复现性}
 
-执行层为开源 eval harness：\texttt{model.val(save\_json=True)} 单次推理同时产出官方指标与预测 JSON；M1/M2/M3 引擎纯离线（NumPy）计算，不占 GPU。三门禁保证口径实现正确（见 3.2 节）。可复现契约（环境、权重、数据、逐条命令、口径说明）见仓库 REPRODUCIBILITY.md。协议 JSON 契约（schema\_version$=$1）可供下游作图与二次分析。harness 与本文源码开源：\url{https://github.com/fanyifan090409-dev/pose-eval-harness} 与 \url{https://github.com/fanyifan090409-dev/elthan-pose-research}；训练分支（基于 ultralytics）见 \url{https://github.com/fanyifan090409-dev/elthan-pose}。
+执行层为开源 eval harness：\texttt{model.val(save\_json=True)} 单次推理同时产出官方指标与预测 JSON；M1/M2/M3 引擎纯离线（NumPy）计算，不占 GPU。三门禁保证口径实现正确（见 3.2 节）。可复现契约（环境、权重、数据、逐条命令、口径说明）见仓库 REPRODUCIBILITY.md；全部模型权重（含 round5-3 与 YOLO-oracle 变体）经仓库 GitHub Release 分发，校验和与获取方式记录于 REPRODUCIBILITY.md。协议 JSON 契约（schema\_version$=$1）可供下游作图与二次分析。harness 与本文源码开源：\url{https://github.com/fanyifan090409-dev/pose-eval-harness} 与 \url{https://github.com/fanyifan090409-dev/elthan-pose-research}；训练分支（基于 ultralytics）见 \url{https://github.com/fanyifan090409-dev/elthan-pose}。
 
 \section{实验设置}
 
 \textbf{数据集。} 四个公开数据集：COCO val2017（通用域对照；$v$ 分布 55.4\%/7.8\%/36.8\% 对应 $v{=}2/1/0$）、CrowdPose val（拥挤/遮挡域；$v{=}1$ 为真实遮挡标记；分布 22.5\%/30.8\%/其余）、OCHuman test（重度遮挡域；分布 69.2\%/14.3\%/其余）、PoseTrack18 val（视频时序；170 视频 / 8,923 标注帧；GT $v\in\{0,1\}$，其中 $v{=}0$ 即 (0,0) 占位）。所有数据集统一为 COCO17 关键点格式。PoseTrack 经 MPII 官方学术许可获取，仅用于学术评估。
 
-\textbf{模型。} 两个基准模型：（1）官方 YOLO11s-pose 预训练权重~\cite{14}；（2）round5-3——在 COCO、MPII、CrowdPose、OCHuman 等公开数据上微调 YOLO11s-pose 所得，代表遮挡域数据训练。两者同架构、同推理配置，仅训练数据不同，适合检验协议对训练数据差异的敏感性。round5-3 的训练数据仅限训练划分（COCO train2017、MPII train、CrowdPose train、OCHuman train，另加受控比例的 OpenThermalPose train）；本文所用的四个评测划分（COCO val2017、CrowdPose val、OCHuman test、PoseTrack18 val）均未出现在其训练数据中，协议数字无泄漏。另有两个模型把基准扩展到跨架构：（3）ViTPose-B 与（4）ViTPose-L~\cite{17}，同架构族、不同容量的自顶向下 Transformer 模型（ViT-B/L 主干），在检测器无关的 GT-bbox oracle 协议下评测。为使每一项跨架构比较都是同协议检验，两个 YOLO 模型也在 oracle 协议下额外评测：每个 GT 人框裁剪、letterbox 到 $640\times640$、不翻转直接送进单阶段模型（Transformer 的 UDP 预处理保持 $256\times192$ 加翻转测试）。四个模型由此覆盖两个架构族，支持三组比较：YOLO 族内的训练数据效应（RQ1--RQ4）、ViTPose 族内的架构容量效应（RQ5），以及统一 oracle 协议下的跨架构效应（RQ5）。该协议下四个模型同台比较；YOLO-oracle 变体仅在预处理上不同（GT 人框裁剪加 letterbox，而非 UDP 加翻转），第~5.5 节报告并讨论其影响。
+\textbf{模型。} 两个基准模型：（1）官方 YOLO11s-pose 预训练权重~\cite{14}；（2）round5-3——作者训练流水线第 5 轮数据配置第 3 个检查点的产物（名称沿用内部运行编号），在 COCO、MPII、CrowdPose、OCHuman 等公开数据上微调 YOLO11s-pose 所得，代表遮挡域数据训练。两者同架构、同推理配置，仅训练数据不同，适合检验协议对训练数据差异的敏感性。round5-3 的训练数据仅限训练划分（COCO train2017、MPII train、CrowdPose train、OCHuman train，另加受控比例的 OpenThermalPose train~\cite{18}）；本文所用的四个评测划分（COCO val2017、CrowdPose val、OCHuman test、PoseTrack18 val）均未出现在其训练数据中，协议数字无泄漏。另有两个模型把基准扩展到跨架构：（3）ViTPose-B 与（4）ViTPose-L~\cite{17}，同架构族、不同容量的自顶向下 Transformer 模型（ViT-B/L 主干），在检测器无关的 GT-bbox oracle 协议下评测。为使每一项跨架构比较都是同协议检验，两个 YOLO 模型也在 oracle 协议下额外评测：每个 GT 人框裁剪、letterbox 到 $640\times640$、不翻转直接送进单阶段模型（Transformer 的 UDP 预处理保持 $256\times192$ 加翻转测试）。四个模型由此覆盖两个架构族，支持三组比较：YOLO 族内的训练数据效应（RQ1--RQ4）、ViTPose 族内的架构容量效应（RQ5），以及统一 oracle 协议下的跨架构效应（RQ5）。该协议下四个模型同台比较；YOLO-oracle 变体仅在预处理上不同（GT 人框裁剪加 letterbox，而非 UDP 加翻转），第~5.5 节报告并讨论其影响。
 
 \textbf{推理与口径。} 输入 $640\times640$，逐帧独立推理，save\_json 保存预测。所有 mAP 数字采用 pycocotools 2.0.11 官方发布数口径；该口径的 OKS 双倍 bbox 兜底规则：GT 关键点 $vg>0$ 但关键点面积为 0（$k_1=0$，即 COCO (0,0) 占位）时，以 bbox 推导的尺度计分而非直接丢弃。注意该口径与 ultralytics 内部评估器可相差 20 点以上（根源：num\_keypoints$=$0 的 GT 标 ignore、OKS 双倍 bbox 兜底、maxDets$=$20）；论文每张表均注明口径。PoseTrack 无官方 pycoco 对照，其官方指标仅报告内部评估器口径（round5-3 0.1085 / YOLO11s-pose 0.1213 mAP$^{50-95}$(P)）。门禁 1（与官方库对拍）在全部六个模型-数据集单元上实测 $\le 0.0001$（五个单元精确为 0）。
 
-\textbf{检测器无关 oracle 协议。} ViTPose 模型直接用每个 GT 人框作为检测结果——每个 GT 标注出一个预测——检测器误差完全不进入管线；预处理遵循官方自顶向下口径（UDP 仿射变换、$256\times192$ 输入、flip test）；PoseTrack 的 657 个退化 $0\times0$ GT 框在源头跳过。oracle 协议隔离姿态头：所有残余误差都归因于关键点定位与可见性推理，而非检测。门禁 1（与 pycocotools 2.0.11 对拍）在全部六个 ViTPose 模型-数据集单元上精确为 0；ViTPose-B 的 COCO 全量 AP（0.7676）与官方论文数字（75.8）一致——小幅差距符合预期，因为 oracle 移除了检测误差~\cite{17}。oracle 与检测式之间的跨族比较仅作方向性参考（第~5.5 节）。
+\textbf{检测器无关 oracle 协议。} ViTPose 模型直接用每个 GT 人框作为检测结果——每个 GT 标注出一个预测——检测器误差完全不进入管线；预处理遵循官方自顶向下口径（UDP 仿射变换、$256\times192$ 输入、flip test）；PoseTrack 的 657 个退化 $0\times0$ GT 框在源头跳过。oracle 协议隔离姿态头：所有残余误差都归因于关键点定位与可见性推理，而非检测。门禁 1（与 pycocotools 2.0.11 对拍）在全部六个 ViTPose 模型-数据集单元上精确为 0；ViTPose-B 的 COCO 全量 AP（0.7676）较官方论文数字（75.8，检测框输入口径）高 0.96 点——方向与量级符合预期，因为 oracle 以 GT 人框替换检测框、移除了检测误差~\cite{17}。oracle 与检测式之间的跨族比较仅作方向性参考（第~5.5 节）。
 
 \section{结果}
 
@@ -180,7 +180,7 @@ M3 时序抖动 & 帧间位移 / 抖动 / 跳变率，OneEuro 前后 & PoseTrack
 
 \begin{table}[t]
 \centering
-\caption{M1 分层 mAP$^{50-95}$(P)（pycocotools 2.0.11 口径）。粗体 $=$ 显著占优（bootstrap CI 不含 0）。gt\_frac $=$ 该层 GT 关键点占比；gt\_person\_frac $=$ 拥有该层至少一个关键点的 GT 人员占比（两者均为 GT 属性，两模型相同）。$\Delta_{\mathrm{occ}}=$ mAP（$v{=}1$ 层）$-$ mAP（全量），同一全量 GT 人员集上计算（3.2 节）；其 bootstrap CI 见附录~A。--- $=$ 该层不定义。CrowdPose 的 v2 层受 14$\rightarrow$17 映射裁剪影响（gt\_person\_frac 0.591）；跨层比较使用 $\Delta_{\mathrm{occ}}$。}
+\caption{M1 分层 mAP$^{50-95}$(P)（pycocotools 2.0.11 口径）。粗体 $=$ 显著占优（bootstrap CI 不含 0）。gt\_frac $=$ 该层 GT 关键点占比；gt\_person\_frac $=$ 拥有该层至少一个关键点的 GT 人员占比（两者均为 GT 属性，两模型相同）。$\Delta_{\mathrm{occ}}=$ mAP（$v{=}1$ 层）$-$ mAP（全量），同一全量 GT 人员集上计算（3.2 节）；其 bootstrap CI 见附录~A。--- $=$ 该层不定义。CrowdPose 官方标注把可见点几乎全部标为 $v{=}2$，叠加全员召回分母（gt\_person\_frac 0.591）使其 v2 层 AP 被系统性低估；跨层比较使用 $\Delta_{\mathrm{occ}}$（分母偏置在差值中抵消）。}
 \label{tab:m1}
 \renewcommand{\arraystretch}{1.15}
 \resizebox{\columnwidth}{!}{%
@@ -206,7 +206,7 @@ OCHuman test & $v{=}0$ & 0 & 0 & --- & --- & 0.164 & 0.902 \\
 
 第一，\textbf{$\Delta_{\mathrm{occ}}$ 全部为负且量级可观}：COCO 上 $-0.40$ 与 $-0.41$，CrowdPose $-0.24$，OCHuman $-0.26$ 至 $-0.30$。在每一个受测组合中，全量 mAP 都高估了遮挡场景表现 24--41 个点。这一差距部分是固有困难：$v{=}1$ 关键点对任何模型都更难，$\Delta_{\mathrm{occ}}$ 把固有困难与掩盖混在了一起。能单独分离「掩盖」的模型级量是 $\Delta\Delta_{\mathrm{occ}}=\Delta_{\mathrm{occ}}(\mathrm{YOLO})-\Delta_{\mathrm{occ}}(\mathrm{r5\text{-}3})$，它在三个数据集上均显著（COCO $-0.013$ [$-0.018$, $-0.009$]，CrowdPose $+0.008$ [$+0.004$, $+0.011$]，OCHuman $+0.034$ [$+0.024$, $+0.043$]；附录~A，表~A2）：两模型在「各自全量 mAP 高估遮挡场景的程度」上存在差异，而这一差异在聚合分数中完全不可见。
 
-第二，\textbf{分层改变了模型比较的结论强度}。通用域 COCO 上，YOLO11s-pose 在全量与 $v{=}2$ 层显著占优（$\Delta=+0.0104$，95\% CI $[0.0059,0.0155]$），但 $v{=}1$ 层未发现差异（$\Delta=-0.0028$，ns）——聚合分数上的显著优势几乎全部来自可见关键点。遮挡域数据集上，round5-3 三层全部显著占优（CrowdPose 全量 $\Delta=-0.0687$，OCHuman 全量 $\Delta=-0.1396$，95\% CI 均不含 0），遮挡域训练的收益在 $v{=}1$ 层同样显著（OCHuman v1 $\Delta=-0.1055$）。不过与全量 mAP 的符号一致性仍是完美的（$\tau_s=1.0$，第~5.4 节）：对受测的两个模型而言，分层改变的是模型差距的量级而非方向。我们把同样的分层扩展到 oracle 协议下的两个 Transformer 模型与两个 YOLO-oracle 模型（第~5.5 节），在该族内观察到同样的稳定性；统一 oracle 协议下的跨族重排名在第~5.5 节检验。
+第二，\textbf{分层改变了模型比较的结论强度}。通用域 COCO 上，YOLO11s-pose 在全量与 $v{=}2$ 层显著占优（$\Delta=+0.0104$，95\% CI $[0.0059,0.0155]$），但 $v{=}1$ 层未发现差异（$\Delta=-0.0028$，ns）——聚合分数上的显著优势几乎全部来自可见关键点。遮挡域数据集上，round5-3 三层全部显著占优（CrowdPose 全量 $\Delta=-0.0687$，OCHuman 全量 $\Delta=-0.1396$，95\% CI 均不含 0），遮挡域训练的收益在 $v{=}1$ 层同样显著（OCHuman v1 $\Delta=-0.1055$；CrowdPose 的 v2 层 AP 受全员召回分母低估，其跨层结论以 $\Delta_{\mathrm{occ}}$ 为准，第~3.2 节）。不过与全量 mAP 的符号一致性仍是完美的（$\tau_s=1.0$，第~5.4 节）：对受测的两个模型而言，分层改变的是模型差距的量级而非方向。我们把同样的分层扩展到 oracle 协议下的两个 Transformer 模型与两个 YOLO-oracle 模型（第~5.5 节），在该族内观察到同样的稳定性；统一 oracle 协议下的跨族重排名在第~5.5 节检验。
 
 第三，\textbf{$v{=}0$ 层恒为 0}（两模型、三数据集），验证协议预期：缺失关键点无法被估计；该层保留作完整性证据，不参与排名。
 
@@ -216,7 +216,7 @@ OCHuman test & $v{=}0$ & 0 & 0 & --- & --- & 0.164 & 0.902 \\
 
 \begin{table}[t]
 \centering
-\caption{M2 关节角 RMSE（$^{\circ}$，左右侧按样本数合并）。粗体 $=$ 显著占优（bootstrap CI 不含 0）；逐项比较的 CI 见附录~A（表~A3）。}
+\caption{M2 关节角 RMSE（$^{\circ}$，左右侧按实例合并）。粗体 $=$ 显著占优（bootstrap CI 不含 0）；逐项比较的 CI 见附录~A（表~A3）。}
 \label{tab:m2}
 \renewcommand{\arraystretch}{1.15}
 \resizebox{\columnwidth}{!}{%
@@ -234,11 +234,11 @@ OCHuman test & YOLO11s-pose & 39.6 & 57.7 & 28.3 & 39.7 \\
 \end{tabular}}
 \end{table}
 
-第一，\textbf{角度误差被遮挡系统性放大}：每个模型-数据集组合中，$v{=}1$ 层 RMSE 均高于 $v{=}2$ 层（肘 $+5.7^{\circ}$ 至 $+18.1^{\circ}$，膝 $+5.3^{\circ}$ 至 $+11.4^{\circ}$），层间差距在重度遮挡域（OCHuman）最大。这与 M1 的 $\Delta_{\mathrm{occ}}$ 观察同向，两者互为佐证。
+第一，\textbf{角度误差被遮挡系统性放大}：每个模型-数据集组合中，$v{=}1$ 层 RMSE 点估计均高于 $v{=}2$ 层（肘 $+5.7^{\circ}$ 至 $+18.1^{\circ}$，膝 $+5.3^{\circ}$ 至 $+11.4^{\circ}$），层间差距在重度遮挡域（OCHuman）最大；逐组合的 v1$-$v2 层差配对 bootstrap CI 见附录~A（表~A13）。这与 M1 的 $\Delta_{\mathrm{occ}}$ 观察同向，两者互为佐证。
 
-第二，\textbf{角度指标区分了全量 mAP 无法区分的信息}。通用域 COCO 上未发现两模型角度差异的证据（与 mAP 差 1 点一致）；但遮挡域上 round5-3 在 $v{=}1$ 层每一项受测比较中都更准：CrowdPose 肘 31.6$^{\circ}$ vs.\ 35.0$^{\circ}$、膝 25.9$^{\circ}$ vs.\ 30.5$^{\circ}$（均显著）；OCHuman 肘 45.7$^{\circ}$ vs.\ 57.7$^{\circ}$、膝 32.0$^{\circ}$ vs.\ 39.7$^{\circ}$（全部显著）。注意 OCHuman 的 $v{=}2$ 层角度差异同样显著，说明遮挡域训练的收益不限于被遮挡关键点本身。以上比较使用各模型自己的有效实例集；在两模型集合的交集上重算后，全部 24 个显著性判定不变（第~3.2 节）。
+第二，\textbf{角度指标区分了全量 mAP 无法区分的信息}。通用域 COCO 上未发现两模型角度差异的证据（与 mAP 差 1 点一致）；但遮挡域上 round5-3 在 $v{=}1$ 层每一项受测比较中都更准：CrowdPose 肘 31.6$^{\circ}$ vs.\ 35.0$^{\circ}$、膝 25.9$^{\circ}$ vs.\ 30.5$^{\circ}$（均显著）；OCHuman 肘 45.7$^{\circ}$ vs.\ 57.7$^{\circ}$、膝 32.0$^{\circ}$ vs.\ 39.7$^{\circ}$（全部显著）。注意 OCHuman 的 $v{=}2$ 层角度差异同样显著，说明遮挡域训练的收益不限于被遮挡关键点本身。以上比较使用各模型自己的有效实例集；在两模型集合的交集上重算后，全部 24 个显著性判定不变（第~3.3 节）。
 
-第三，\textbf{膝内扣检出一致性}（表~\ref{tab:kappa}）：round5-3 的 $\kappa$ 在三个数据集上均高于 YOLO11s-pose（COCO 0.759 vs.\ 0.745；CrowdPose 0.739 vs.\ 0.669；OCHuman 0.602 vs.\ 0.519），阈值敏感性分析（$\tau_\varphi\in\{10^{\circ},17^{\circ}\}$）下结论稳定。Bootstrap CI（附录~A，表~A4）确立 CrowdPose 与 OCHuman 的差距显著（$\Delta\kappa$ $-0.069$ [$-0.098$, $-0.041$] 与 $-0.084$ [$-0.121$, $-0.046$]），COCO 的差距方向一致但不显著（$\Delta\kappa$ $-0.014$ [$-0.045$, $0.016$]）。两模型在 OCHuman 上的 $\kappa$ 均偏低（$<0.61$），提示重度遮挡下 $\phi$ 的测量噪声上升。
+第三，\textbf{膝内扣检出一致性}（表~\ref{tab:kappa}）：round5-3 的 $\kappa$ 在三个数据集上均高于 YOLO11s-pose（默认阈值 $\tau_\varphi{=}15^{\circ}$ 下：COCO 0.759 vs.\ 0.745；CrowdPose 0.739 vs.\ 0.669；OCHuman 0.602 vs.\ 0.519），阈值敏感性分析（$\tau_\varphi\in\{10^{\circ},17^{\circ}\}$）下结论稳定。Bootstrap CI（附录~A，表~A4）确立 CrowdPose 与 OCHuman 的差距显著（$\Delta\kappa$ $-0.069$ [$-0.098$, $-0.041$] 与 $-0.084$ [$-0.121$, $-0.046$]），COCO 的差距方向一致但不显著（$\Delta\kappa$ $-0.014$ [$-0.045$, $0.016$]）。两模型在 OCHuman 上的 $\kappa$ 均偏低（$<0.61$），提示重度遮挡下 $\phi$ 的测量噪声上升。
 
 \begin{table}[t]
 \centering
@@ -262,7 +262,7 @@ OCHuman test & YOLO11s-pose & 0.529 & 0.519 & 0.502 & 0.592/0.900 \\
 
 \subsection{RQ3：无追踪推理的时序稳定性与平滑代价}
 
-PoseTrack18 val 上两模型各得到 704 / 728 条轨迹段（161 / 160 个视频，中位段长 31 帧）。段保留过滤相当严格：这些段覆盖标注帧的 53.4\% / 53.1\%，且 20.1\% / 16.3\% 的 GT 人员实例从未被匹配（第~3.3 节）。表~\ref{tab:m3} 给出 person-scale 归一化后的总体三指标与平滑 AP 代价；图~\ref{fig:m3} 展示一条示例轨迹。
+PoseTrack18 val 上两模型各得到 704 / 728 条轨迹段（161 / 160 个视频，中位段长 31 帧）。段保留过滤相当严格：这些段覆盖标注帧的 53.4\% / 53.1\%，且 20.1\% / 16.3\% 的 GT 人员实例从未被匹配（第~3.4 节）。表~\ref{tab:m3} 给出 person-scale 归一化后的总体三指标与平滑 AP 代价；图~\ref{fig:m3} 展示一条示例轨迹（round5-3 的最长左膝保留段，选作可视化示例；汇总统计以全部保留段为准）。
 
 \begin{table}[t]
 \centering
@@ -286,13 +286,13 @@ YOLO11s-pose & q 域平滑 & 0.0462 & 0.0546 & 0.2336 & 0.0878 & $-0.0029$ \\
 
 三点观察。第一，\textbf{两模型的原始时序稳定性未发现差异}：全部七个指标（位移/抖动均值与 P95、三档跳变率阈值）的 bootstrap CI 均包含 0。未发现遮挡域训练数据改变时序稳定性的证据——「未发现遮挡训练影响时序行为的证据」本身即一个有信息量的结果，提示数据侧干预应与时序后处理分开考虑。
 
-第二，\textbf{像素域 OneEuro 平滑以零精度代价换取稳定性}：跳变率（$\tau_j=0.05$）相对下降 9.3\%（round5-3）与 9.7\%（YOLO11s-pose），帧间位移均值下降约 7\%，AP 变化保持在 $\pm0.0002$ 内。这一收益不是默认参数的偶然：OneEuro 网格（min\_cutoff $\times$ beta，第~3.3 节）的全部 12 个设置都把两模型每一项 M3 指标降到原始基线以下，且 $|\Delta\mathrm{AP}|\le 0.0004$。第三，\textbf{q 域平滑适得其反}：三指标全面上升（jump\_0.05 升至 0.2200/0.2336），AP 微降——GT 人框的逐帧尺度噪声在反归一化时被重新注入像素域（机制见 3.4 节）。这一对比说明：对无追踪逐帧输出做平滑时，滤波域的选择决定收益；协议因此固定像素域为主口径。
+第二，\textbf{像素域 OneEuro 平滑以零匹配口径 AP 代价换取稳定性}：跳变率（$\tau_j=0.05$）相对下降 9.3\%（round5-3）与 9.7\%（YOLO11s-pose）——更宽松的敏感性阈值 $\tau_j=0.10$ 下降幅更大（12.7\% / 12.6\%，表~\ref{tab:m3}），并非默认阈值的偶然——帧间位移均值下降约 7\%，AP 变化保持在 $\pm0.0002$ 内。这一收益不是默认参数的偶然：OneEuro 网格（min\_cutoff $\times$ beta，第~3.4 节）的全部 12 个设置都把两模型每一项 M3 指标降到原始基线以下，且 $|\Delta\mathrm{AP}|\le 0.0004$。第三，\textbf{q 域平滑适得其反}：三指标全面上升（jump\_0.05 升至 0.2200/0.2336），AP 微降——GT 人框的逐帧尺度噪声在反归一化时被重新注入像素域（机制见 3.4 节）。这一对比说明：对无追踪逐帧输出做平滑时，滤波域的选择决定收益；协议因此固定像素域为主口径。
 
 \subsection{RQ4：指标间相关性}
 
-在（数据集 $\times$ 层）单元（$n=6$）上，计算协议指标差（$\Delta=$ YOLO11s-pose $-$ round5-3，RMSE 差经符号翻转使正值恒代表 YOLO11s-pose 更优）与全量 mAP 差的符号一致性 $\tau_s$，仅统计全量 mAP 差互不相同的 12 对（3.5 节）：分层 mAP $\tau_s=1.0$（12/12 对），肘角 RMSE $\tau_s=1.0$（12/12），膝角 RMSE $\tau_s=0.667$（10/12）；扩展到 24 个关节级单元，$\tau_s=0.719$（165/192）。同一差值向量之间的 Spearman $\rho$：全量 $\Delta$ 与分层 $\Delta$ 之间 $\rho=0.956$（$p=0.003$）；全量 $\Delta$ 与肘角之间 $\rho=0.956$（$p=0.003$）；全量 $\Delta$ 与膝角之间 $\rho=0.717$（$p=0.109$）；肘角与膝角之间 $\rho=0.771$（$p=0.072$）。两个相同的 $\rho=0.956$ 并非转录错误：分层 mAP 与肘角误差的差值向量对六个单元的排序完全相同，且它们与全量 mAP 差的排序差异仅发生在同一数据集的两个层之间——该两层共享同一个全量 mAP 差（并列），Spearman 分子在两种情况下均不变。
+在（数据集 $\times$ 层）单元（$n=6$）上，计算协议指标差（$\Delta=$ YOLO11s-pose $-$ round5-3，RMSE 差经符号翻转使正值恒代表 YOLO11s-pose 更优）与全量 mAP 差的符号一致性 $\tau_s$，仅统计全量 mAP 差互不相同的 12 对（3.5 节）：分层 mAP $\tau_s=1.0$（12/12 对），肘角 RMSE $\tau_s=1.0$（12/12），膝角 RMSE $\tau_s=0.667$（10/12）；扩展到 24 个关节级单元，$\tau_s=0.719$（$C{=}165$，$D{=}27$，共 192 对）。同一差值向量之间的 Spearman $\rho$：全量 $\Delta$ 与分层 $\Delta$ 之间 $\rho=0.956$；全量 $\Delta$ 与肘角之间 $\rho=0.956$；全量 $\Delta$ 与膝角之间 $\rho=0.717$；肘角与膝角之间 $\rho=0.771$（$n=6$ 单元仅来自 3 个独立数据集，p 值仅作名义报告：$p=0.003/0.003/0.109/0.072$，不用于推断）。两个相同的 $\rho=0.956$ 并非转录错误：分层 mAP 与肘角误差的差值向量对六个单元的排序完全相同，且它们与全量 mAP 差的排序差异仅发生在同一数据集的两个层之间——该两层共享同一个全量 mAP 差（并列），Spearman 分子在两种情况下均不变。
 
-两点解读（探索性；$n=6$ 个单元仅来自 3 个独立数据集）。第一，\textbf{分层 mAP 的排名信息与全量 mAP 完全符号一致（$\tau_s=1.0$）}；其协议价值不在重排名，而在量级诊断——$\Delta_{\mathrm{occ}}$ 提供的「被掩盖多少」是标量 mAP 无法给出的。第二，\textbf{角度指标携带部分独立信息}：膝角 RMSE 与全量 AP 的相关性未达显著，且在 COCO 上方向分歧（round5-3 膝角更准而全量 mAP 更低；表~\ref{tab:m2}）——角度协议捕获了 OKS 之外的差异维度。就协议精简而言：分层 mAP 与角度误差均不冗余，各自捕捉不同盲区。时序指标仅有一个数据集的单元，待更多数据检验。
+两点解读（探索性；$n=6$ 个单元仅来自 3 个独立数据集）。第一，\textbf{分层 mAP 的排名信息与全量 mAP 完全符号一致（$\tau_s=1.0$）}；其协议价值不在重排名，而在量级诊断——$\Delta_{\mathrm{occ}}$ 提供的「被掩盖多少」是标量 mAP 无法给出的。第二，\textbf{角度指标携带部分独立信息}：膝角 RMSE 与全量 AP 的差值排序并未重合，且在 COCO 上方向分歧（round5-3 膝角更准而全量 mAP 更低；表~\ref{tab:m2}）——角度协议捕获了 OKS 之外的差异维度（描述性证据，不作统计推断）。就协议精简而言：分层 mAP 与角度误差均不冗余，各自捕捉不同盲区。时序指标仅有一个数据集的单元，待更多数据检验。
 
 \subsection{RQ5：跨架构的盲区与排名稳定性}
 
@@ -326,7 +326,7 @@ OCHuman test & $v{=}0$ & 0 & 0 & 0 & 0 & 0 \\
 
 \begin{table}[t]
 \centering
-\caption{oracle 协议下的 M2 关节角 RMSE（$^{\circ}$，左右侧按样本数合并），四个模型。两个 ViTPose 模型间的显著性在逐关节层面判定（附录~A 表~A7）：24 项比较中 5 项显著、全部利于 ViTPose-L；粗体标出两项逐关节比较均显著的合并单元。YOLO-oracle 族内显著性亦为逐关节（附录~A 表~A11）：COCO 无显著项，CrowdPose 一项（左肘 $v{=}1$，$-3.0^{\circ}$），OCHuman 三项（左肘 $v{=}1$ $-9.2^{\circ}$、右肘 $v{=}2$ $-4.1^{\circ}$、右肘 $v{=}1$ $-8.2^{\circ}$），全部利于 round5-3-oracle。$^{\dagger}$ 检测式运行；仅作通向表~\ref{tab:m2} 的桥梁。}
+\caption{oracle 协议下的 M2 关节角 RMSE（$^{\circ}$，左右侧按实例合并），四个模型。两个 ViTPose 模型间的显著性在逐关节层面判定（附录~A 表~A7）：24 项比较中 5 项显著、全部利于 ViTPose-L；粗体标出两项逐关节比较均显著的合并单元。YOLO-oracle 族内显著性亦为逐关节（附录~A 表~A11）：COCO 无显著项，CrowdPose 一项（左肘 $v{=}1$，$-3.0^{\circ}$），OCHuman 三项（左肘 $v{=}1$ $-9.2^{\circ}$、右肘 $v{=}2$ $-4.1^{\circ}$、右肘 $v{=}1$ $-8.2^{\circ}$），全部利于 round5-3-oracle。$^{\dagger}$ 检测式运行；仅作通向表~\ref{tab:m2} 的桥梁。}
 \label{tab:m2x}
 \renewcommand{\arraystretch}{1.15}
 \resizebox{\columnwidth}{!}{%
@@ -377,27 +377,27 @@ YOLO11s-oracle & 原始 & 0.0463 & 0.0542 & 0.2322 & 0.0828 & --- \\
 
 四点观察。第一，\textbf{三个盲区在更强的 Transformer 模型上依然存在——且部分加深，YOLO 模型对在同一协议下同样如此}。oracle 协议下每个组合的 $\Delta_{\mathrm{occ}}$ 均为负：Transformer 模型对 $-0.24$ 至 $-0.47$，YOLO-oracle 模型对 $-0.19$ 至 $-0.34$，Transformer 的量级与检测式模型对（$-0.24$ 至 $-0.41$）相当或更大；COCO 上 ViTPose oracle 的 $\Delta_{\mathrm{occ}}$（$-0.47$）甚至超过检测式的 $-0.40$。更强的架构或更大的容量买不来更小的盲区：两种协议下，全量 mAP 都把遮挡场景表现高估了 19--47 个点。
 
-第二，\textbf{oracle 协议把时序抖动分解为检测器、训练数据与架构三个分量}。移除检测器并不能消除任何一个架构族的抖动：Transformer 模型对在无检测器的情况下跳变率仍为 0.165（B）/ 0.160（L），YOLO 模型对按 oracle 协议重跑后跳变率为 0.223/0.232——不低于其检测式的 0.206/0.215（oracle 运行的预处理与匹配段总体不同，这最后一项比较是提示性的，并非受控分解）。残余高频抖动因此是姿态头内生的。统一 oracle 协议下，全部四项跨族比较在 disp\_mean、disp\_p95、jump\_0.05 与 jump\_0.10 上均显著（如 ViTPose-B $-$ round5-3-oracle 的 jump\_0.05 为 $-0.058$ [$-$0.080, $-$0.036]；附录~A 表~A10）：Transformer 族显著更时序稳定——这是架构效应。YOLO-oracle 模型对在所有 M3 指标上均无差异（全部七个 CI 含 0）：训练数据差异不改变时序稳定性，架构才会。jitter\_mean 在全部六个运行、两种协议下几乎恒定（0.0521--0.0542），提示中值滤波残差度量的是逐帧热图推断的稳定属性，而非模型特有属性。平滑域结论在 YOLO-oracle 模型对上同样复现：像素域平滑把跳变率降低 10.7\%（round5-3-oracle）而匹配口径 AP 仅 $+0.0009$，q 域平滑反而上升 5.0\% 并付出 0.0068 AP。像素域主口径因此跨架构成立，q 域失效机制与架构无关。
+第二，\textbf{oracle 协议把时序抖动分解为检测器、训练数据与跨族三个分量}。移除检测器并不能消除任何一个架构族的抖动：Transformer 模型对在无检测器的情况下跳变率仍为 0.165（B）/ 0.160（L），YOLO 模型对按 oracle 协议重跑后跳变率为 0.223/0.232——不低于其检测式的 0.206/0.215（oracle 运行的预处理与匹配段总体不同，这最后一项比较是提示性的，并非受控分解）。残余高频抖动因此在无检测器参与时依然存在；它究竟是姿态头内生还是残余预处理差异所致，在当前 oracle 设计下无法分离。统一 oracle 协议下，全部四项跨族比较在 disp\_mean、jump\_0.05 与 jump\_0.10 上均显著，disp\_p95 为四分之三显著（ViTPose-B $-$ round5-3-oracle 的 disp\_p95 CI [$-$0.0275, $+0.0006]$ 含 0；如 ViTPose-B $-$ round5-3-oracle 的 jump\_0.05 为 $-0.058$ [$-$0.080, $-$0.036]；附录~A 表~A10）：Transformer 族显著更时序稳定——这是跨族差异，其中架构与预处理、输入分辨率、翻转测试相互混杂。YOLO-oracle 模型对在所有 M3 指标上均无差异（全部七个 CI 含 0）：训练数据差异不改变时序稳定性，跨族差距才会。jitter\_mean 在全部六个运行、两种协议下几乎恒定（0.0521--0.0542），提示中值滤波残差度量的是逐帧热图推断的稳定属性，而非模型特有属性。平滑域结论在 YOLO-oracle 模型对上同样复现：像素域平滑把跳变率降低 10.7\%（round5-3-oracle）而匹配口径 AP 仅 $+0.0009$，q 域平滑反而上升 5.0\% 并付出 0.0068 AP。像素域主口径因此跨架构成立，q 域失效机制与架构无关。
 
 第三，\textbf{两个族内的排名都稳定}。ViTPose-L 在全部九个 M1 排名单元上显著优于 ViTPose-B（CI 见附录~A 表~A6；如 COCO 全量 $+0.0312$ [$+0.0247$, $+0.0329$]），M2 方向性占优（24 项逐关节比较中 5 项显著、全部利于 ViTPose-L，集中于 $v{=}2$ 层）。YOLO 族内，oracle 协议在每个数据集上都保持了检测式的排名：COCO 全量与 $v{=}2$ 层 YOLO11s-oracle 显著占优（round5-3-oracle $\Delta=-0.0161$ [$-$0.0220, $-$0.0099]），CrowdPose 与 OCHuman 三层全部由 round5-3-oracle 显著占优（全量 $+0.0442$ [$+0.0361$, $+0.0527$] 与 $+0.0501$ [$+0.0383$, $+0.0633$]；表~A8）。域差距在 oracle 下缩小——OCHuman 全量检测式 $+0.1396$ 对比 oracle $+0.0501$——说明 round5-3 的检测式优势有一部分是检测器带来的，但训练数据效应本身在移除检测器后依然存在。
 
-第四，\textbf{协议把训练数据效应与架构容量效应分离开来，且现已具备统计性}。统一协议下 OCHuman 的 $v{=}1$ 层上，遮挡域训练的小模型 round5-3-oracle 取得肘 $49.2^{\circ}$ / 膝 $38.6^{\circ}$，对比 ViTPose-B 的 $55.3^{\circ}$ / $36.9^{\circ}$：round5-3-oracle 在遮挡肘部层显著比 ViTPose-B 更准（左肘，ViTPose-B $-$ round5-3-oracle $\Delta=+7.4^{\circ}$ [$+2.4$, $+12.5$]；表~A12），且 ViTPose-L 在任何 $v{=}1$ 关节上都未显著超越它（左肘 ViTPose-L 为 $+4.6^{\circ}$ [$-$0.4, $+9.5$]，ns；膝部 ns）——尽管 ViTPose-L 的全量 mAP 领先 $+0.2538$（0.6083 vs.\ 0.3546）。没有遮挡域训练数据的容量优势不会转化为遮挡层角度精度；这一分离在两种协议的全量 mAP 中均不可见，正是协议新增的信息。
+第四，\textbf{协议把训练数据效应与模型容量效应分离开来，且现已具备统计性}。统一协议下 OCHuman 的 $v{=}1$ 层上，遮挡域训练的小模型 round5-3-oracle 取得左肘 $47.4^{\circ}$ / 左膝 $37.1^{\circ}$，对比 ViTPose-B 的 $54.7^{\circ}$ / $36.7^{\circ}$（单侧 RMSE，与表~A12 的单侧 CI 口径一致）：round5-3-oracle 在遮挡肘部层显著比 ViTPose-B 更准（左肘，ViTPose-B $-$ round5-3-oracle $\Delta=+7.4^{\circ}$ [$+2.4$, $+12.5$]；表~A12），且 ViTPose-L 在任何 $v{=}1$ 关节上都未显著超越它（左肘 ViTPose-L 为 $+4.6^{\circ}$ [$-$0.4, $+9.5$]，ns；膝部 ns）——尽管 ViTPose-L 的全量 mAP 领先 $+0.2538$（0.6083 vs.\ 0.3546）。没有遮挡域训练数据的容量优势不会转化为遮挡层角度精度；这一分离在两种协议的全量 mAP 中均不可见，正是协议新增的信息。
 
-综上，同协议比较表明：（i）三个盲区在一个统一协议下跨架构族持续存在；（ii）族内训练数据效应在移除检测器后以压缩的量级存活；（iii）时序稳定性因架构而异、不因训练数据而异；（iv）遮挡域训练的小模型保持着对 ViTPose-B 的显著遮挡肘角优势，连 ViTPose-L 也未能显著逆转。
+综上，同协议比较表明：（i）三个盲区在一个统一协议下跨架构族持续存在；（ii）族内训练数据效应在移除检测器后以压缩的量级存活；（iii）时序稳定性因两个架构族而异、不因训练数据而异；（iv）遮挡域训练的小模型保持着对 ViTPose-B 的显著遮挡肘角优势，连 ViTPose-L 也未能显著逆转。
 
 \section{讨论}
 
-\textbf{三盲区的量级据我们所知首次在同一协议下被量化。} 四个数据集、两个模型的一致观察是：全量 mAP 对遮挡场景的高估（$\Delta_{\mathrm{occ}}$ $-0.24$ 至 $-0.41$）、遮挡对角度误差的放大（$v{=}1$ 层肘角 RMSE 最高 $+18.1^{\circ}$）、以及无追踪逐帧输出的高频抖动（跳变率 $\approx0.21$，可被像素域平滑零代价降低约 10\%）。这些数字共同说明：仅由 OKS-mAP 驱动的模型选择会误读两个受测模型之间差距的构成——COCO 上 YOLO11s-pose 的显著聚合优势几乎全部来自可见关键点、并不延伸到遮挡层，而两模型在遮挡掩盖程度上的差异（$\Delta\Delta_{\mathrm{occ}}$，第~5.1 节）在三个数据集上均显著——这些都是聚合分数中不可见的差异。这些盲区的量级并非单一架构特有：oracle 协议下 Transformer 模型对以更大的遮挡掩盖复现同一模式，YOLO 模型对在同一协议下以压缩的量级再次复现（第~5.5 节）；oracle 分解把残余时序抖动定位在姿态头本身，并显示 Transformer 族的跳变率显著低于 YOLO 族。
+\textbf{三盲区的量级据我们所知首次在同一协议下被量化。} 四个数据集、两个模型的一致观察是：全量 mAP 对遮挡场景的高估（$\Delta_{\mathrm{occ}}$ $-0.24$ 至 $-0.41$）、遮挡对角度误差的放大（$v{=}1$ 层肘角 RMSE 最高 $+18.1^{\circ}$）、以及无追踪逐帧输出的高频抖动（PoseTrack18 val 保留段子总体上、默认阈值 $\tau_j=0.05$ 下两模型跳变率 $\approx0.21$，可被像素域平滑以零匹配口径 AP 代价降低约 10\%）。这些数字共同说明：仅由 OKS-mAP 驱动的模型选择会误读两个受测模型之间差距的构成——COCO 上 YOLO11s-pose 的显著聚合优势几乎全部来自可见关键点、并不延伸到遮挡层，而两模型在遮挡掩盖程度上的差异（$\Delta\Delta_{\mathrm{occ}}$，第~5.1 节）在三个数据集上均显著——这些都是聚合分数中不可见的差异。这些盲区的量级并非单一架构特有：oracle 协议下 Transformer 模型对以更大的遮挡掩盖复现同一模式，YOLO 模型对在同一协议下以压缩的量级再次复现（第~5.5 节）；oracle 分解显示残余时序抖动在移除检测器后依然存在，并显示 Transformer 族的跳变率显著低于 YOLO 族。
 
-\textbf{角度协议与效度研究的边界。} 本文的角度指标以 GT 推导角度为参照，回答「哪个模型的关节角更接近标注真值」——一种模型比较工具。它不验证「估测角度是否等于临床金标准」，后者是 markerless 效度文献~\cite{4,5,6}的任务，需要标记点或专家标注。两者互补：效度研究证明某个模型在特定场景可信，本协议则让任何新模型在标准数据集上获得角度维度的可比较分数。同样，膝内扣检出一致性（$\kappa$ 最高 0.76）只断言「与 GT 标注一致」，不断言临床意义。
+\textbf{角度协议与效度研究的边界。} 本文的角度指标以 GT 推导角度为参照，回答「哪个模型的关节角更接近标注真值」——一种模型比较工具。它不验证「估测角度是否等于临床金标准」，后者是 markerless 效度文献~\cite{4,5,6}的任务，需要标记点或专家标注。两者互补：效度研究证明某个模型在特定场景可信，本协议则让任何新模型在标准数据集上获得角度维度的可比较分数。同样，膝内扣检出一致性（默认阈值 $\tau_\varphi{=}15^{\circ}$ 下 $\kappa$ 最高 0.76）只断言「与 GT 标注一致」，不断言临床意义。
 
-\textbf{时序指标的工程含义。} M3 的发现直接指导系统设计：其一，数据侧干预（遮挡训练）不改变时序稳定性，时序质量必须单独处理；其二，平滑域选择决定收益——归一化域滤波看似理论正确，实际因 GT 框尺度噪声重注入而失效；其三，oracle 分解（第~5.5 节）把残余抖动定位在姿态头，改进检测并非抓手——应走后处理或姿态头层面的改进。协议固定像素域主口径，并建议任何时序平滑方法报告「平滑前后抖动 + AP 代价」的联合表。
+\textbf{时序指标的工程含义。} M3 的发现直接指导系统设计：其一，数据侧干预（遮挡训练）不改变时序稳定性，时序质量必须单独处理；其二，平滑域选择决定收益——归一化域滤波看似理论正确，实际因 GT 框尺度噪声重注入而失效；其三，oracle 分解（第~5.5 节）显示残余抖动在移除检测器后依然存在——改进检测并非抓手；应走后处理或姿态头层面的改进，而姿态头内生与预处理贡献的分离需预处理一致的对照实验确认。协议固定像素域主口径，并建议任何时序平滑方法报告「平滑前后抖动 + AP 代价」的联合表。
 
-\textbf{局限。} （1）基准在两种协议下覆盖两个架构族：YOLO 族内模型对为检测式，ViTPose 族内模型对使用检测器无关的 oracle 协议，而全部跨族比较均在统一 oracle 协议下进行。YOLO-oracle 变体使用 GT 人框裁剪加 letterbox 而非 Transformer 的 UDP 预处理，因此残余的预处理差异无法与架构差异完全分离。将基准扩展到其他架构（如 RTMPose、DWPose）留待后续工作，协议价值在于口径与工具；（2）CrowdPose 的 v2 层受 14$\rightarrow$17 映射裁剪影响，该数据集上跨层比较使用 $\Delta_{\mathrm{occ}}$；（3）角度为 2D 图像平面角，受视角影响，不是 3D 关节角或临床角度；（4）M3 仅覆盖一个数据集，且其保留段子总体只覆盖约 53\% 的标注帧，时序结论的普适性待扩展；（5）RQ4 相关分析的单元数小（$n=6$ 个单元仅来自 3 个独立数据集），属探索性；（6）COCO 的 $v{=}1$ 层仅占关键点 7.8\%，其 $v{=}1$ 层估计方差较大（CI 更宽）；（7）M2 的比较使用各模型自己的有效实例集；在共享交集上重算后全部显著性判定不变，但覆盖差异明显的模型应改用交集口径。每张表均注明评估口径：M1/M2 数字遵循 pycocotools 2.0.11，而 PoseTrack 的官方指标数字（第~4 节）因无官方 pycoco 对照而以 ultralytics 内部评估器口径报告。
+\textbf{局限。} （1）基准在两种协议下覆盖两个架构族：YOLO 族内模型对为检测式，ViTPose 族内模型对使用检测器无关的 oracle 协议，而全部跨族比较均在统一 oracle 协议下进行。YOLO-oracle 变体使用 GT 人框裁剪加 letterbox 而非 Transformer 的 UDP 预处理，且两者在输入分辨率（$640\times640$ vs.\ $256\times192$）与翻转测试的使用（无 vs.\ 有）上亦有差异。跨族比较因此明确存在混杂：预处理、分辨率与翻转测试差异未与架构差异分离，任何跨族差距都应解读为联合效应而非纯架构效应（第~5.5 节采用此表述）。将基准扩展到其他架构（如 RTMPose、DWPose）留待后续工作，协议价值在于口径与工具；（2）CrowdPose 官方标注的可见性聚类（可见点几乎全为 $v{=}2$）叠加全员召回分母使其 v2 层 AP 被系统性低估，该数据集上跨层比较使用 $\Delta_{\mathrm{occ}}$；（3）角度为 2D 图像平面角，受视角影响，不是 3D 关节角或临床角度；（4）M3 仅覆盖一个数据集，且其保留段子总体只覆盖约 53\% 的标注帧，时序结论的普适性待扩展；（5）RQ4 相关分析的单元数小（$n=6$ 个单元仅来自 3 个独立数据集），属探索性；（6）COCO 的 $v{=}1$ 层仅占关键点 7.8\%，其 $v{=}1$ 层估计方差较大（CI 更宽）；（7）M2 的比较使用各模型自己的有效实例集；在共享交集上重算后全部显著性判定不变，但覆盖差异明显的模型应改用交集口径。每张表均注明评估口径：M1/M2 数字遵循 pycocotools 2.0.11，而 PoseTrack 的官方指标数字（第~4 节）因无官方 pycoco 对照而以 ultralytics 内部评估器口径报告。
 
 \section{结论}
 
-本文提出并执行了一个面向遮挡、关节角度与时序稳定性的二维人体姿态估计统一补充评估协议，配套开源 harness 与可复现契约。两个架构族、四个模型、四个公开数据集上的基准结果显示：在每一个受测的模型-数据集组合中，全量 OKS-mAP 都掩盖了遮挡特定的精度差异（$\Delta_{\mathrm{occ}}$ 达 $-0.47$）；角度误差协议捕获了 OKS 之外的部分独立信息；像素域平滑能以零精度代价降低时序抖动；检测器无关的 oracle 协议进一步把残余抖动定位在姿态头——三个盲区在一个统一 oracle 协议下跨架构持续存在，且跨族排名、训练数据与时序稳定性效应可在显著性层面分离。协议定位为 OKS-mAP 的补充而非替代：它不改变主流排名的底层口径，而是为模型选择与系统设计增加三个此前不可见的诊断维度。代码与全部原始预测已开源。
+本文提出并执行了一个面向遮挡、关节角度与时序稳定性的二维人体姿态估计统一补充评估协议，配套开源 harness 与可复现契约。两个架构族、四个模型、四个公开数据集上的基准结果显示：在每一个受测的模型-数据集组合中，全量 OKS-mAP 都掩盖了遮挡特定的精度差异（$\Delta_{\mathrm{occ}}$ 达 $-0.47$）；角度误差协议捕获了 OKS 之外的部分独立信息；在 PoseTrack18 val 的已匹配保留段子总体上，像素域平滑能以零匹配口径 AP 代价降低时序抖动；检测器无关的 oracle 协议进一步显示残余抖动在移除检测器后依然存在（并非检测器内生）——三个盲区在一个统一 oracle 协议下跨架构持续存在，且跨族排名、训练数据与时序稳定性效应可在显著性层面分离。协议定位为 OKS-mAP 的补充而非替代：它不改变主流排名的底层口径，而是为模型选择与系统设计增加三个此前不可见的诊断维度。代码与全部原始预测已开源。
 
 % =====================================================================
 % 图（与英文版同一套图文件）
@@ -442,7 +442,7 @@ YOLO11s-oracle & 原始 & 0.0463 & 0.0542 & 0.2322 & 0.0828 & --- \\
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{figures/fig_m3_posetrack.png}
-\caption{M3 时序抖动示例（PoseTrack18 val 一条轨迹，round5-3，最长左膝段）：（上）按人框尺度归一化的逐帧位移 $d_t$，含跳变阈值 $\tau_j=0.10$；（下）因果 5 帧中值滤波周围的残差抖动 $j_t$。}
+\caption{M3 时序抖动示例（PoseTrack18 val 一条示例轨迹——round5-3 的最长左膝保留段；展示用途而非汇总统计量）：（上）按人框尺度归一化的逐帧位移 $d_t$，含敏感性跳变阈值 $\tau_j=0.10$；（下）因果 5 帧中值滤波周围的残差抖动 $j_t$。}
 \label{fig:m3}
 \end{figure}
 
@@ -455,13 +455,13 @@ YOLO11s-oracle & 原始 & 0.0463 & 0.0542 & 0.2322 & 0.0828 & --- \\
 \setcounter{table}{0}
 \section{Bootstrap 置信区间}
 
-所有区间均为 95\% 百分位 bootstrap CI，10,000 次重采样，seed 42。重采样单元：M1 与 M2 为图像（各指标在模型比较前先在该单元上聚合），M3 为轨迹段。配对比较在两量之间共享同一重采样索引；模型间比较对两模型单元独立重采样。符号约定：$\Delta=$ YOLO11s-pose $-$ round5-3，故 $\Delta<0$ 对 AP 与 $\kappa$ 表示 round5-3 占优，对 RMSE 表示 YOLO11s-pose 占优；oracle 协议比较（表~A6--A7）$\Delta=$ ViTPose-L $-$ ViTPose-B，故 $\Delta>0$ 对 AP 表示 ViTPose-L 占优，$\Delta<0$ 对 RMSE 表示 ViTPose-L 占优；表~A8 中 $\Delta=$ round5-3-oracle $-$ YOLO11s-oracle，故 $\Delta>0$ 对 AP 表示 round5-3-oracle 占优，$\Delta<0$ 对 RMSE 表示其占优；表~A9 中 $\Delta=$（Transformer 模型）$-$（YOLO-oracle 模型）按列头标示，故 $\Delta>0$ 对 AP 表示前者占优，$\Delta<0$ 对 RMSE 表示前者占优；表~A10 中 $\Delta=$（Transformer 模型）$-$（YOLO-oracle 模型）按行标示，故 $\Delta<0$ 表示 Transformer 占优（抖动更低）；表~A11--A12 中 $\Delta=$（前一名模型）$-$（后一名模型）按表头标示，故 $\Delta<0$ 对 RMSE 表示前一名模型占优。$^{*}$ 标记不含 0 的区间。固定比较清单的每一项均列出，无挑选。
+所有区间均为逐比较、未做多重校正的 95\% 百分位 bootstrap CI，10,000 次重采样，seed 42；显著性仅作辅助，核心结论以三数据集方向一致性与效应量支撑。核心比较族的 Benjamini--Hochberg FDR 校正敏感性分析见表~A14。重采样单元：M1 与 M2 为图像（各指标在模型比较前先在该单元上聚合），M3 为轨迹段。配对比较在两量之间共享同一重采样索引；模型间比较对两模型单元独立重采样。符号约定：$\Delta=$ YOLO11s-pose $-$ round5-3，故 $\Delta<0$ 对 AP 与 $\kappa$ 表示 round5-3 占优，对 RMSE 表示 YOLO11s-pose 占优；oracle 协议比较（表~A6--A7）$\Delta=$ ViTPose-L $-$ ViTPose-B，故 $\Delta>0$ 对 AP 表示 ViTPose-L 占优，$\Delta<0$ 对 RMSE 表示 ViTPose-L 占优；表~A8 中 $\Delta=$ round5-3-oracle $-$ YOLO11s-oracle，故 $\Delta>0$ 对 AP 表示 round5-3-oracle 占优，$\Delta<0$ 对 RMSE 表示其占优；表~A9 中 $\Delta=$（Transformer 模型）$-$（YOLO-oracle 模型）按列头标示，故 $\Delta>0$ 对 AP 表示前者占优，$\Delta<0$ 对 RMSE 表示前者占优；表~A10 中 $\Delta=$（Transformer 模型）$-$（YOLO-oracle 模型）按行标示，故 $\Delta<0$ 表示 Transformer 占优（抖动更低）；表~A11--A12 中 $\Delta=$（前一名模型）$-$（后一名模型）按表头标示，故 $\Delta<0$ 对 RMSE 表示前一名模型占优。$^{*}$ 标记不含 0 的区间。固定比较清单的每一项均列出，无挑选。
 
 \input{appendix_tables_zh}
 
-\begin{thebibliography}{17}
+\begin{thebibliography}{18}
 \bibitem{1} T.-Y. Lin \emph{et al.}, ``Microsoft COCO: Common objects in context,'' in \emph{Proc. ECCV}, 2014.
-\bibitem{2} S.-H. Zhang \emph{et al.}, ``Pose2Seg: Detection free human instance segmentation (OCHuman),'' arXiv:1803.10683, 2018.
+\bibitem{2} S.-H. Zhang \emph{et al.}, ``Pose2Seg: Detection free human instance segmentation,'' in \emph{Proc. CVPR}, 2019; arXiv:1803.10683, 2018.
 \bibitem{3} M. Andriluka \emph{et al.}, ``PoseTrack: A benchmark for human pose estimation and tracking,'' in \emph{Proc. CVPR}, 2018; arXiv:1712.09184, 2017.
 \bibitem{4} J. Turner, J. Clark, and N. Keshtmand, ``Markerless pose estimation for resistance training technique assessment,'' arXiv:2608.24384, 2026.
 \bibitem{5} Panconi \emph{et al.}, ``Deep-learning-based markerless pose estimation systems in gait analysis,'' arXiv:2407.10590, 2024.
@@ -477,6 +477,7 @@ YOLO11s-oracle & 原始 & 0.0463 & 0.0542 & 0.2322 & 0.0828 & --- \\
 \bibitem{15} A. Zeng, L. Yang, X. Ju, J. Li, J. Wang, and Q. Xu, ``SmoothNet: A plug-and-play network for refining human pose estimation in videos,'' in \emph{Proc. ECCV}, 2022; arXiv:2112.13715, 2022.
 \bibitem{16} M. Andriluka, L. Pishchulin, P. Gehler, and B. Schiele, ``2D human pose estimation: New benchmark and state of the art analysis,'' in \emph{Proc. CVPR}, 2014.
 \bibitem{17} Y. Xu, J. Zhang, Q. Zhang, and D. Tao, ``ViTPose: Simple vision transformer baselines for human pose estimation,'' in \emph{Proc. NeurIPS}, 2022; arXiv:2204.12484, 2022.
+\bibitem{18} A. Kuzdeuov, D. Taratynova, A. Tleuliyev, and H. A. Varol, ``OpenThermalPose: An open-source annotated thermal human pose dataset and initial YOLOv8-pose baselines,'' Authorea Preprints, 2024. \url{https://github.com/Kuzdeuov/OpenThermalPose}
 \end{thebibliography}
 
 \end{document}
