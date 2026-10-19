@@ -234,7 +234,7 @@ OCHuman test & YOLO11s-pose & 39.6 & 57.7 & 28.3 & 39.7 \\
 \end{tabular}}
 \end{table}
 
-第一，\textbf{角度误差被遮挡系统性放大}：每个模型-数据集组合中，$v{=}1$ 层 RMSE 点估计均高于 $v{=}2$ 层（肘 $+5.7^{\circ}$ 至 $+18.1^{\circ}$，膝 $+5.3^{\circ}$ 至 $+11.4^{\circ}$），层间差距在重度遮挡域（OCHuman）最大；逐组合的 v1$-$v2 层差配对 bootstrap CI 见附录~A（表~A13）。这与 M1 的 $\Delta_{\mathrm{occ}}$ 观察同向，两者互为佐证。
+第一，\textbf{角度误差被遮挡系统性放大}：每个模型-数据集组合中，$v{=}1$ 层 RMSE 点估计均高于 $v{=}2$ 层（肘 $+5.7^{\circ}$ 至 $+18.1^{\circ}$，膝 $+5.3^{\circ}$ 至 $+11.4^{\circ}$），层间差距在重度遮挡域（OCHuman）最大；逐组合的 v1$-$v2 层差配对 bootstrap CI 见附录~A（表~A13）。配套的 MAE 与 P95 统计量按模型、数据集、关节、层逐项列于附录~A（表~A15），复现同一规律（24 个模型-数据集-关节组合中，$v{=}1$ 单元的 MAE 与 P95 全部高于其 $v{=}2$ 对应单元，最大误差出现在 OCHuman 域）。这与 M1 的 $\Delta_{\mathrm{occ}}$ 观察同向，两者互为佐证。
 
 第二，\textbf{角度指标区分了全量 mAP 无法区分的信息}。通用域 COCO 上未发现两模型角度差异的证据（与 mAP 差 1 点一致）；但遮挡域上 round5-3 在 $v{=}1$ 层每一项受测比较中都更准：CrowdPose 肘 31.6$^{\circ}$ vs.\ 35.0$^{\circ}$、膝 25.9$^{\circ}$ vs.\ 30.5$^{\circ}$（均显著）；OCHuman 肘 45.7$^{\circ}$ vs.\ 57.7$^{\circ}$、膝 32.0$^{\circ}$ vs.\ 39.7$^{\circ}$（全部显著）。注意 OCHuman 的 $v{=}2$ 层角度差异同样显著，说明遮挡域训练的收益不限于被遮挡关键点本身。以上比较使用各模型自己的有效实例集；在两模型集合的交集上重算后，全部 24 个显著性判定不变（第~3.3 节）。
 
@@ -455,7 +455,7 @@ YOLO11s-oracle & 原始 & 0.0463 & 0.0542 & 0.2322 & 0.0828 & --- \\
 \setcounter{table}{0}
 \section{Bootstrap 置信区间}
 
-所有区间均为逐比较、未做多重校正的 95\% 百分位 bootstrap CI，10,000 次重采样，seed 42；显著性仅作辅助，核心结论以三数据集方向一致性与效应量支撑。核心比较族的 Benjamini--Hochberg FDR 校正敏感性分析见表~A14。重采样单元：M1 与 M2 为图像（各指标在模型比较前先在该单元上聚合），M3 为轨迹段。配对比较在两量之间共享同一重采样索引；模型间比较对两模型单元独立重采样。符号约定：$\Delta=$ YOLO11s-pose $-$ round5-3，故 $\Delta<0$ 对 AP 与 $\kappa$ 表示 round5-3 占优，对 RMSE 表示 YOLO11s-pose 占优；oracle 协议比较（表~A6--A7）$\Delta=$ ViTPose-L $-$ ViTPose-B，故 $\Delta>0$ 对 AP 表示 ViTPose-L 占优，$\Delta<0$ 对 RMSE 表示 ViTPose-L 占优；表~A8 中 $\Delta=$ round5-3-oracle $-$ YOLO11s-oracle，故 $\Delta>0$ 对 AP 表示 round5-3-oracle 占优，$\Delta<0$ 对 RMSE 表示其占优；表~A9 中 $\Delta=$（Transformer 模型）$-$（YOLO-oracle 模型）按列头标示，故 $\Delta>0$ 对 AP 表示前者占优，$\Delta<0$ 对 RMSE 表示前者占优；表~A10 中 $\Delta=$（Transformer 模型）$-$（YOLO-oracle 模型）按行标示，故 $\Delta<0$ 表示 Transformer 占优（抖动更低）；表~A11--A12 中 $\Delta=$（前一名模型）$-$（后一名模型）按表头标示，故 $\Delta<0$ 对 RMSE 表示前一名模型占优。$^{*}$ 标记不含 0 的区间。固定比较清单的每一项均列出，无挑选。
+所有区间均为逐比较、未做多重校正的 95\% 百分位 bootstrap CI，10,000 次重采样，seed 42；显著性仅作辅助，核心结论以三数据集方向一致性与效应量支撑。核心比较族的 Benjamini--Hochberg FDR 校正敏感性分析见表~A14。重采样单元：M1 与 M2 为图像（各指标在模型比较前先在该单元上聚合），M3 为轨迹段。配对比较在两量之间共享同一重采样索引；模型间比较对两模型单元独立重采样。符号约定：$\Delta=$ YOLO11s-pose $-$ round5-3，故 $\Delta<0$ 对 AP 与 $\kappa$ 表示 round5-3 占优，对 RMSE 表示 YOLO11s-pose 占优；oracle 协议比较（表~A6--A7）$\Delta=$ ViTPose-L $-$ ViTPose-B，故 $\Delta>0$ 对 AP 表示 ViTPose-L 占优，$\Delta<0$ 对 RMSE 表示 ViTPose-L 占优；表~A8 中 $\Delta=$ round5-3-oracle $-$ YOLO11s-oracle，故 $\Delta>0$ 对 AP 表示 round5-3-oracle 占优，$\Delta<0$ 对 RMSE 表示其占优；表~A9 中 $\Delta=$（Transformer 模型）$-$（YOLO-oracle 模型）按列头标示，故 $\Delta>0$ 对 AP 表示前者占优，$\Delta<0$ 对 RMSE 表示前者占优；表~A10 中 $\Delta=$（Transformer 模型）$-$（YOLO-oracle 模型）按行标示，故 $\Delta<0$ 表示 Transformer 占优（抖动更低）；表~A11--A12 中 $\Delta=$（前一名模型）$-$（后一名模型）按表头标示，故 $\Delta<0$ 对 RMSE 表示前一名模型占优；表~A13 中 $\Delta=$ 同模型内 RMSE$(v{=}1)-$RMSE$(v{=}2)$，故 $\Delta>0$ 表示遮挡层误差更高；表~A14 中 $\Delta=$ round5-3 $-$ YOLO11s-pose（族内一致），故 $\Delta>0$ 对 AP 表示 round5-3 占优、对 RMSE 与抖动指标表示 YOLO11s-pose 占优。表~A15 仅列 MAE/P95 原始点估计，不带区间。$^{*}$ 标记不含 0 的区间。固定比较清单的每一项均列出，无挑选。
 
 \input{appendix_tables_zh}
 
