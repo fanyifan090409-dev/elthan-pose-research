@@ -1,4 +1,5 @@
 import json
+import os
 import subprocess
 import time
 import zipfile
@@ -9,9 +10,10 @@ IMGROOT = BASE / "images" / "squat"
 OUT = BASE / "practice-annot"
 ZIP = BASE / "practice-frames.zip"
 
-SU = "elthan"
-PW = "__REMOVED__"
-EMAIL = "__REMOVED__"
+# 凭证从环境变量读取，不落库：CVAT_SUPERUSER / CVAT_SUPERUSER_PW（仓库公开后历史里无明文）
+SU = os.environ.get("CVAT_SUPERUSER")
+PW = os.environ.get("CVAT_SUPERUSER_PW")
+EMAIL = os.environ.get("CVAT_SUPERUSER_EMAIL")
 API = "http://127.0.0.1:8080/api"
 
 
